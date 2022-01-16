@@ -779,6 +779,7 @@ public class NotificationManagerService extends SystemService {
     private boolean mSoundVibScreenOn;
 
     private AppLockManagerServiceInternal mAppLockManagerService = null;
+    private boolean mSoundVibScreenOn;
 
     static class Archive {
         final SparseArray<Boolean> mEnabled;
@@ -2216,6 +2217,8 @@ public class NotificationManagerService extends SystemService {
             resolver.registerContentObserver(NOTIFICATION_SOUND_VIB_SCREEN_ON,
                     false, this, UserHandle.USER_ALL);
 
+            resolver.registerContentObserver(NOTIFICATION_SOUND_VIB_SCREEN_ON,
+                    false, this, UserHandle.USER_ALL);
             update(null);
         }
 
