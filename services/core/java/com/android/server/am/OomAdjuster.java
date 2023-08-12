@@ -1305,7 +1305,7 @@ public class OomAdjuster {
             }
         }
         final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
-        final int cachedProcessLimit = (mConstants.CUR_MAX_CACHED_PROCESSES - emptyProcessLimit);
+        final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES - emptyProcessLimit;
         int lastCachedGroup = 0;
         int lastCachedGroupUid = 0;
         int numCached = 0;
@@ -1645,12 +1645,6 @@ public class OomAdjuster {
         if (lastUserUnlockingUptime == 0) {
             // No users have been unlocked.
             return !mConstants.mNoKillCachedProcessesUntilBootCompleted;
-        }
-        final long noKillCachedProcessesPostBootCompletedDurationMillis =
-                mConstants.mNoKillCachedProcessesPostBootCompletedDurationMillis;
-        if ((lastUserUnlockingUptime + noKillCachedProcessesPostBootCompletedDurationMillis)
-                > nowUptime) {
-            return false;
         }
         return true;
     }
