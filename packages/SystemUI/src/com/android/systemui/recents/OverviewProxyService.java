@@ -60,6 +60,7 @@ import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.InputDevice;
@@ -614,8 +615,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mSceneInteractor = sceneInteractor;
         mUserTracker = userTracker;
         mConnectionBackoffAttempts = 0;
-        mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
-                com.android.internal.R.string.config_recentsComponentName));
+        int defaultLauncher = SystemProperties.getInt("persist.sys.default_launcher", 0);
+        String[] launcherComponents = context.getResources().getStringArray(com.android.internal.R.array.config_launcherComponents);
+        mRecentsComponentName = ComponentName.unflattenFromString(launcherComponents[defaultLauncher]);
         mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
         mSysUiState = sysUiState;
