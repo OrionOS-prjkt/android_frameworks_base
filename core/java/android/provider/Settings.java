@@ -7320,12 +7320,9 @@ public final class Settings {
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
-<<<<<<< HEAD
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
-=======
             PRIVATE_SETTINGS.add(AMBIENT_TEXT_COLOR);
             PRIVATE_SETTINGS.add(AMBIENT_TEXT_TYPE_COLOR);
->>>>>>> 0699e06375e8 (Add Ambient Customizations [1/2])
         }
 
         /**
@@ -13408,6 +13405,12 @@ public final class Settings {
          * @hide
          */
         public static final String PULSE_SMOOTHING_ENABLED = "pulse_smoothing_enabled";
+
+        /**
+         * Volume styles
+         * @hide
+         */
+        public static final String CUSTOM_VOLUME_STYLES = "custom_volume_styles";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
