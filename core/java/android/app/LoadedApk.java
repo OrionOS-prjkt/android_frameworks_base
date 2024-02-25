@@ -2004,7 +2004,7 @@ public final class LoadedApk {
                 Slog.d(TAG, "Unbinding Service " + c
                         + " from Context that is no longer in use: " + context);
             } else {
-                Slog.d(TAG, "Service not registered: " + c);
+               Slog.d(TAG, "Service not registered: " + c);
             }
             return null;
         }
