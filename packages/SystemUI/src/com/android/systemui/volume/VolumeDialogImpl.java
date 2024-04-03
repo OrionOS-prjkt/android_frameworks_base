@@ -284,11 +284,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private ImageButton mRingerIcon;
     private ViewGroup mODICaptionsView;
     private CaptionsToggleImageButton mODICaptionsIcon;
-    private View mSettingsView;
+    private ViewGroup mSettingsView;
     private ImageButton mSettingsIcon;
-    private View mExpandRowsView;
+    private ViewGroup mExpandRowsView;
     private ExpandableIndicator mExpandRows;
-    private View mAppVolumeView;
+    private ViewGroup mAppVolumeView;
     private ImageButton mAppVolumeIcon;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private final List<VolumeRow> mAppRows = new ArrayList<>();
@@ -335,8 +335,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     // Variable to track the default row with which the panel is initially shown
     private VolumeRow mDefaultRow = null;
-
-    private FrameLayout mRoundedBorderBottom;
 
     // Volume panel expand state
     private enum ExpansionState {
@@ -788,7 +786,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     mRingerAndDrawerContainerBackground = ringerAndDrawerBg.getDrawable(0);
 
                     updateBackgroundForDrawerClosedAmount();
-                    setTopContainerBackgroundDrawable();
+                    //setTopContainerBackgroundDrawable();
 
                     // Rows need to be updated after mRingerAndDrawerContainerBackground is set
                     updateRowsH(getActiveRow());
@@ -835,8 +833,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mSettingsView = mDialog.findViewById(R.id.settings_container);
         mSettingsIcon = mDialog.findViewById(R.id.settings);
 
-        mRoundedBorderBottom = mDialog.findViewById(R.id.rounded_border_bottom);
-
         mExpandRowsView = mDialog.findViewById(R.id.expandable_indicator_container);
         mExpandRows = mDialog.findViewById(R.id.expandable_indicator);
 
@@ -860,6 +856,15 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             setGravity(mDialogRowsViewContainer, Gravity.LEFT);
 
             setGravity(mODICaptionsView, Gravity.LEFT);
+
+            setGravity(mSettingsView, Gravity.LEFT);
+            setLayoutGravity(mSettingsView, Gravity.LEFT);
+
+            setGravity(mExpandRowsView, Gravity.LEFT);
+            setLayoutGravity(mExpandRowsView, Gravity.LEFT);
+
+            setGravity(mAppVolumeView, Gravity.LEFT);
+            setLayoutGravity(mAppVolumeView, Gravity.LEFT);
 
             mExpandRows.setRotation(-90);
         }
@@ -1506,9 +1511,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private void initSettingsH(int lockTaskModeState) {
         final boolean showSettings = mDeviceProvisionedController.isCurrentUserSetup()
                 && lockTaskModeState == LOCK_TASK_MODE_NONE;
-        if (mRoundedBorderBottom != null) {
-            mRoundedBorderBottom.setVisibility(!showSettings ? VISIBLE : GONE);
-        }
         if (mSettingsView != null) {
             mSettingsView.setVisibility(showSettings && (isMediaControllerAvailable() ||
                     (Flags.useMediaRouter2ForInfoMediaManager() && isBluetoothA2dpConnected()))
@@ -2167,7 +2169,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 linearLayoutParams.setMarginStart(0);
                 linearLayoutParams.setMarginEnd(0);
                 lastVisibleChild.setLayoutParams(linearLayoutParams);
-                lastVisibleChild.setBackgroundColor(Color.TRANSPARENT);
             }
 
             int elevationCount = 0;
@@ -2178,7 +2179,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 // Add a solid background to the outmost row temporary so that other rows animate
                 // behind it
                 lastVisibleChild.setBackgroundDrawable(
-                        mContext.getDrawable(R.drawable.volume_background));
+                        mContext.getDrawable(R.drawable.volume_row_rounded_background));
             }
 
             int[] lastVisibleChildLocation = new int[2];
@@ -2261,7 +2262,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                     if (mAnimatingRows == 0) {
                                         // Restore the elevation and background
                                         lastVisibleChild.setElevation(0);
-                                        lastVisibleChild.setBackgroundColor(Color.TRANSPARENT);
                                         // Set the active stream to ensure the volume keys change
                                         // the volume of the tinted row. The tint was set before
                                         // already, but setting the active row cancels ongoing
