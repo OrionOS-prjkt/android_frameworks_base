@@ -70,6 +70,7 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.BluetoothController;
