@@ -57,7 +57,6 @@ import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationMana
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -71,8 +70,14 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
+<<<<<<< HEAD
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
+=======
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
+>>>>>>> b58140a2b8c3 (SystemUI: Introduce Lockscreen widgets [3/n])
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -116,9 +121,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final LogBuffer mLogBuffer;
     private final NotificationIconContainerAlwaysOnDisplayViewBinder mNicViewBinder;
     private final TunerService  mTunerService;
-    private final ActivityStarter mActivityStarter;
-    private final ConfigurationController mConfigurationController;
-    private final FlashlightController mFlashlightController;
 
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
@@ -222,10 +224,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardInteractor keyguardInteractor,
             KeyguardClockInteractor keyguardClockInteractor,
             FeatureFlagsClassic featureFlags,
-            InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager,
-            ActivityStarter activityStarter,
-            ConfigurationController configurationController,
-            FlashlightController flashlightController) {
+            InWindowLauncherUnlockAnimationManager inWindowLauncherUnlockAnimationManager) {
         super(keyguardClockSwitch);
         mStatusBarStateController = statusBarStateController;
         mClockRegistry = clockRegistry;
@@ -242,9 +241,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mLogBuffer = logBuffer;
         mView.setLogBuffer(mLogBuffer);
         mFeatureFlags = featureFlags;
-        mActivityStarter = activityStarter;
-        mConfigurationController = configurationController;
-        mFlashlightController = flashlightController;
         mKeyguardInteractor = keyguardInteractor;
         mKeyguardClockInteractor = keyguardClockInteractor;
         mInWindowLauncherUnlockAnimationManager = inWindowLauncherUnlockAnimationManager;
@@ -299,17 +295,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardSliceViewController.init();
 
         if (!migrateClocksToBlueprint()) {
-            mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
-            mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
-            mCurrentWeatherView = mView.findViewById(R.id.weather_container);
-            mCustomClock = mView.findViewById(R.id.clock_ls);
-            mCustomClockFrame = mView.findViewById(R.id.clock_frame);
-            mLsWidgets = (LockScreenWidgets) mView.findViewById(R.id.keyguard_widgets);
-            mLsWidgets.initDependencies(
-                mActivityStarter, 
-                mConfigurationController, 
-                mFlashlightController,
-                mStatusBarStateController);
+        mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
+        mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
+        mCurrentWeatherView = mView.findViewById(R.id.weather_container);
+        mCustomClock = mView.findViewById(R.id.clock_ls);
+        mCustomClockFrame = mView.findViewById(R.id.clock_frame);
+        mLsWidgets = (LockScreenWidgets) mView.findViewById(R.id.keyguard_widgets);
         }
 
 
