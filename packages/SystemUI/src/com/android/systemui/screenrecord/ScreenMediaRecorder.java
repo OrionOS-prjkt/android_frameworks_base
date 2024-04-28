@@ -47,6 +47,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
@@ -178,7 +179,11 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         int resRatio = mLowQuality ? LOW_VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO
                 : VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO;
         int vidBitRate = width * height * refreshRate / VIDEO_FRAME_RATE * resRatio;
-        long maxFilesize = mLongerDuration ? MAX_FILESIZE_BYTES_LONGER : MAX_FILESIZE_BYTES;
+        boolean unlimit = Settings.System.getInt(
+                mContext.getContentResolver(),
+                Settings.System.UNLIMIT_SCREENRECORD, 0) != 0;
+        /* PS: HEVC can be set too, to reduce file size without quality loss (h265 is more efficient than h264),
+        but at the same time the cpu load is 8-10 times higher and some devices don't support it yet */
         if (!mHEVC) {
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
             mMediaRecorder.setVideoEncodingProfileLevel(
@@ -195,8 +200,8 @@ public class ScreenMediaRecorder extends MediaProjection.Callback {
         mMediaRecorder.setVideoSize(width, height);
         mMediaRecorder.setVideoFrameRate(refreshRate);
         mMediaRecorder.setVideoEncodingBitRate(vidBitRate);
-        mMediaRecorder.setMaxDuration(mLongerDuration ? 0 : MAX_DURATION_MS);
-        mMediaRecorder.setMaxFileSize(maxFilesize);
+        mMediaRecorder.setMaxDuration(0); // unlimited duration
+        mMediaRecorder.setMaxFileSize(unlimit ? 0 : MAX_FILESIZE_BYTES);
 
         // Set up audio
         if (mAudioSource == MIC) {
