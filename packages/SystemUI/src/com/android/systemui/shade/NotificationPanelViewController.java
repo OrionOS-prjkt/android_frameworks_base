@@ -241,6 +241,8 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import lineageos.providers.LineageSettings;
 
+import android.util.RisingBoostFramework;
+
 import dalvik.annotation.optimization.NeverCompile;
 
 import kotlin.Unit;
@@ -436,6 +438,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private int mDisplayTopInset = 0; // in pixels
     private int mDisplayRightInset = 0; // in pixels
     private int mDisplayLeftInset = 0; // in pixels
+    
+    private RisingBoostFramework mPerf = RisingBoostFramework.getInstance();
 
     @VisibleForTesting
     KeyguardClockPositionAlgorithm mClockPositionAlgorithm;
@@ -657,6 +661,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mUseIslandNotification;
     private boolean mUseHeadsUp;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff5108f03d3e (core: Introduce OrionBoostFramework)
     private final SplitShadeStateController mSplitShadeStateController;
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
@@ -2255,6 +2263,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }
             });
         }
+        mPerf.perfBoost(RisingBoostFramework.WorkloadType.ANIMATION);
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
 
