@@ -467,7 +467,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mUiModeManager = uiModeManager;
         mActivityManager = activityManager;
         dumpManager.registerDumpable(TAG, this);
-        mThemeController = new RisingThemeController(mContext.getContentResolver(), mBgHandler);
+        mThemeController = new RisingThemeController(mContext, mBgHandler);
     }
 
     @Override
