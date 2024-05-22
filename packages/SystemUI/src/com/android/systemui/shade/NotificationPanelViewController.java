@@ -241,6 +241,7 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 import lineageos.providers.LineageSettings;
 
 import android.util.RisingBoostFramework;
+import com.android.internal.util.android.VibrationUtils;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -3916,10 +3917,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening && mBarState != KEYGUARD && mBarState != SHADE_LOCKED) {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
-                mVibratorHelper.performHapticFeedback(
-                        mView,
-                        HapticFeedbackConstants.GESTURE_START
-                );
+                VibrationUtils.triggerVibration(mView.getContext(), 2);
                 mHasVibratedOnOpen = true;
                 mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }
