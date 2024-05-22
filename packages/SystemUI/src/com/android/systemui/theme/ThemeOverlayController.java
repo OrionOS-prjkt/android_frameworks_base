@@ -462,7 +462,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mUiModeManager = uiModeManager;
         dumpManager.registerDumpable(TAG, this);
-        mThemeController = new RisingThemeController(mContext.getContentResolver(), mBgHandler);
+        mThemeController = new RisingThemeController(mContext, mBgHandler);
     }
 
     @Override
