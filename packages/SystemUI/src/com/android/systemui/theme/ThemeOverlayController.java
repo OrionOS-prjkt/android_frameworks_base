@@ -481,7 +481,11 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                 "lockscreen_widgets_enabled",
                 "lockscreen_widgets",
                 "lockscreen_widgets_extras",
-                "user_selected_resolution"
+                "user_selected_resolution",
+                Settings.System.STATUS_BAR_BATTERY_STYLE,
+                Settings.System.QS_BATTERY_STYLE,
+                Settings.System.QS_SHOW_BATTERY_PERCENT,
+                Settings.System.QS_TILE_UI_STYLE
         );
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
                 UserHandle.ALL);
@@ -519,90 +523,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
         mSecureSettings.registerContentObserverForUser(
                 LineageSettings.Secure.getUriFor(LineageSettings.Secure.BERRY_BLACK_THEME),
-                false,
-                new ContentObserver(mBgHandler) {
-                    @Override
-                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
-                            int userId) {
-                        if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
-                        if (mUserTracker.getUserId() != userId) {
-                            return;
-                        }
-                        if (!mDeviceProvisionedController.isUserSetup(userId)) {
-                            Log.i(TAG, "Theme application deferred when setting changed.");
-                            mDeferredThemeEvaluation = true;
-                            return;
-                        }
-                        reevaluateSystemTheme(true /* forceReload */);
-                    }
-                },
-                UserHandle.USER_ALL);
-
-        mSystemSettings.registerContentObserverForUser(
-                Settings.System.getUriFor(Settings.System.STATUS_BAR_BATTERY_STYLE),
-                false,
-                new ContentObserver(mBgHandler) {
-                    @Override
-                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
-                            int userId) {
-                        if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
-                        if (mUserTracker.getUserId() != userId) {
-                            return;
-                        }
-                        if (!mDeviceProvisionedController.isUserSetup(userId)) {
-                            Log.i(TAG, "Theme application deferred when setting changed.");
-                            mDeferredThemeEvaluation = true;
-                            return;
-                        }
-                        reevaluateSystemTheme(true /* forceReload */);
-                    }
-                },
-                UserHandle.USER_ALL);
-
-        mSystemSettings.registerContentObserverForUser(
-                Settings.System.getUriFor(Settings.System.QS_BATTERY_STYLE),
-                false,
-                new ContentObserver(mBgHandler) {
-                    @Override
-                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
-                            int userId) {
-                        if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
-                        if (mUserTracker.getUserId() != userId) {
-                            return;
-                        }
-                        if (!mDeviceProvisionedController.isUserSetup(userId)) {
-                            Log.i(TAG, "Theme application deferred when setting changed.");
-                            mDeferredThemeEvaluation = true;
-                            return;
-                        }
-                        reevaluateSystemTheme(true /* forceReload */);
-                    }
-                },
-                UserHandle.USER_ALL);
-
-        mSystemSettings.registerContentObserverForUser(
-                Settings.System.getUriFor(Settings.System.QS_SHOW_BATTERY_PERCENT),
-                false,
-                new ContentObserver(mBgHandler) {
-                    @Override
-                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
-                            int userId) {
-                        if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
-                        if (mUserTracker.getUserId() != userId) {
-                            return;
-                        }
-                        if (!mDeviceProvisionedController.isUserSetup(userId)) {
-                            Log.i(TAG, "Theme application deferred when setting changed.");
-                            mDeferredThemeEvaluation = true;
-                            return;
-                        }
-                        reevaluateSystemTheme(true /* forceReload */);
-                    }
-                },
-                UserHandle.USER_ALL);
-                
-        mSystemSettings.registerContentObserverForUser(
-                Settings.System.getUriFor(Settings.System.QS_TILE_UI_STYLE),
                 false,
                 new ContentObserver(mBgHandler) {
                     @Override
