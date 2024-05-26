@@ -41,6 +41,9 @@ public class VolumeUtils implements TunerService.Tunable {
     public static final String CUSTOM_VOLUME_STYLES =
             "system:" + "custom_volume_styles";
 
+    public static final String VOLUME_SOUND_HAPTICS =
+            "system:" + "volume_sound_haptics";
+
     private static final int SOUND_HAPTICS_DELAY = 50;
     private static final int SOUND_HAPTICS_DURATION = 2000;
 
@@ -53,6 +56,8 @@ public class VolumeUtils implements TunerService.Tunable {
     
     private int customVolumeStyles = 0;
     private ThemeUtils mThemeUtils;
+    
+    private boolean mSoundHapticsEnabled;
 
     private static final int[] seekbarDrawables = {
             R.drawable.volume_row_seekbar_aosp,
@@ -73,7 +78,7 @@ public class VolumeUtils implements TunerService.Tunable {
         mMediaPlayer = new MediaPlayer();
         mThemeUtils = new ThemeUtils(mContext);
         Dependency.get(TunerService.class).addTunable(this,
-                CUSTOM_VOLUME_STYLES);
+                CUSTOM_VOLUME_STYLES, VOLUME_SOUND_HAPTICS);
     }
 
     @Override
@@ -89,6 +94,9 @@ public class VolumeUtils implements TunerService.Tunable {
                         setVolumeStyle(volumeStyleKey, "android.theme.customization.volume_panel");
                     });
                 }
+                break;
+            case VOLUME_SOUND_HAPTICS:
+                mSoundHapticsEnabled = TunerService.parseIntegerSwitch(newValue, false);
                 break;
             default:
                 break;
@@ -120,6 +128,7 @@ public class VolumeUtils implements TunerService.Tunable {
     }
 
     public void playSoundForStreamType(int streamType) {
+        if (!mSoundHapticsEnabled) return;
         Uri soundUri = null;
         switch (streamType) {
             case AudioManager.STREAM_RING:
