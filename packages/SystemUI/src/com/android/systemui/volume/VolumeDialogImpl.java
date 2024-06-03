@@ -668,8 +668,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mDialog.setOnShowListener(dialog -> {
             mDialogView.getViewTreeObserver().addOnComputeInternalInsetsListener(this);
             if (!shouldSlideInVolumeTray()) {
-                mDialogView.setTranslationX(
-                        (isWindowGravityLeft() ? -1 : 1) * mDialogView.getWidth() / 2.0f);
+                mDialogView.setTranslationX(getDialogTranslation());
             }
             mDialogView.setAlpha(0);
             mDialogView.animate()
@@ -886,6 +885,10 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private boolean isWindowGravityLeft() {
         return (mWindowGravity & Gravity.LEFT) == Gravity.LEFT;
+    }
+    
+    private float getDialogTranslation() { 
+        return (isWindowGravityLeft() ? -1 : 1) * mDialogView.getWidth() / 2.0f;
     }
 
     private void initDimens() {
@@ -1966,12 +1969,13 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                     hideRingerDrawer();
                 }, 50));
         if (!shouldSlideInVolumeTray()) {
-            animator.translationX(
-                    (isWindowGravityLeft() ? -1 : 1) * mDialogView.getWidth() / 2.0f);
+            animator.translationX(getDialogTranslation());
         }
 
         animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
                 mDialogHideAnimationDurationMs)).start();
+
+        mDialogView.setTranslationX(getDialogTranslation());
 
         checkODICaptionsTooltip(true);
         synchronized (mSafetyWarningLock) {
