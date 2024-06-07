@@ -1211,7 +1211,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         boolean hasParticipatedDisplay = false;
         boolean hasVisibleTransientLaunch = false;
         boolean enterAutoPip = false;
-        boolean committedSomeInvisible = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -1266,7 +1265,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         }
                         ar.commitVisibility(false /* visible */, false /* performLayout */,
                                 true /* fromTransition */);
-                        committedSomeInvisible = true;
+                        mController.onCommittedInvisibles(ar);
                     } else {
                         enterAutoPip = true;
                     }
@@ -1333,9 +1332,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // Our original target went invisible, so we should look for a new target.
                 wt.mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
-        }
-        if (committedSomeInvisible) {
-            mController.onCommittedInvisibles();
         }
 
         if (hasVisibleTransientLaunch) {
