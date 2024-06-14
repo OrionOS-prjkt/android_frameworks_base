@@ -67,7 +67,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
     private boolean mHideMobile;
     private boolean mHideEthernet;
     private boolean mActivityEnabled;
-    private boolean mHideVpn;
     private boolean mHideIms;
 
     // Track as little state as possible, and only for padding purposes
@@ -155,7 +154,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
         boolean hideAirplane = hideList.contains(mSlotAirplane);
         boolean hideMobile = hideList.contains(mSlotMobile);
         boolean hideEthernet = hideList.contains(mSlotEthernet);
-        boolean hideVpn = hideList.contains(mSlotVpn);
         boolean hideIms = hideList.contains(mSlotIms);
 
         if (hideVpn != mHideVpn) {
