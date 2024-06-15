@@ -121,7 +121,7 @@ public class StatusBarSignalPolicy implements SignalCallback,
     }
 
     private void updateVpn() {
-        boolean vpnVisible = mSecurityController.isVpnEnabled() && !mHideVpn;
+        boolean vpnVisible = mSecurityController.isVpnEnabled();
         int vpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
 
         if (vpnVisible && vpnIconId > 0) {
@@ -156,10 +156,6 @@ public class StatusBarSignalPolicy implements SignalCallback,
         boolean hideEthernet = hideList.contains(mSlotEthernet);
         boolean hideIms = hideList.contains(mSlotIms);
 
-        if (hideVpn != mHideVpn) {
-            mHideVpn = hideVpn;
-            mHandler.post(this::updateVpn);
-        }
         if (hideAirplane != mHideAirplane || hideMobile != mHideMobile
                 || hideEthernet != mHideEthernet || hideIms != mHideIms) {
             mHideAirplane = hideAirplane;
