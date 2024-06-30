@@ -124,8 +124,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.util.RisingBoostFramework;
-
 /**
  * Service to manage game related features.
  *
@@ -372,8 +370,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     final int userId = data.getInt(USER_ID_MSG_KEY);
 
                     // Restrict to games only. Requires performance mode to be enabled.
-                    final boolean boostEnabled = 
-                        RisingBoostFramework.getInstance().isPackageOnGameList(packageName);
+                    final boolean boostEnabled =
+                            getGameMode(packageName, userId) == GameManager.GAME_MODE_PERFORMANCE;
                     int uid;
                     try {
                         uid = mPackageManager.getPackageUidAsUser(packageName, userId);
@@ -2378,8 +2376,9 @@ public final class GameManagerService extends IGameManagerService.Stub {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             synchronized (mDeviceConfigLock) {
-                String newValue = Settings.Secure.getString(mContentResolver,
-                        Settings.Secure.GAME_OVERLAY);
+                String newValue = Settings.Secure.getStringForUser(mContentResolver,
+                        Settings.Secure.GAME_OVERLAY, UserHandle.USER_CURRENT);
+                if (newValue == null) return;
                 // We write key and value of the device_config property as a single string
                 // from our GameSpace.
                 // ';;' is the separator betweeen key and value.
