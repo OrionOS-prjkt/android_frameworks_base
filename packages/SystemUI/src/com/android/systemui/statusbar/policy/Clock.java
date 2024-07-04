@@ -433,6 +433,7 @@ public class Clock extends TextView implements
                 handler.post(() -> updateClock());
                 if (mClockAutoHide) autoHideHandler.post(() -> updateClockVisibility());
             }
+            handler.postDelayed(() -> updateClock(), 200);
         }
     };
 
