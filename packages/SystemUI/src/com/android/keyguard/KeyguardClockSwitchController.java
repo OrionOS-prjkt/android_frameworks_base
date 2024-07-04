@@ -70,14 +70,9 @@ import com.android.systemui.statusbar.notification.shared.NotificationIconContai
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
-<<<<<<< HEAD
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.FlashlightController;
-=======
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.BluetoothController;
-import com.android.systemui.statusbar.ui.SystemBarUtilsState;
->>>>>>> b58140a2b8c3 (SystemUI: Introduce Lockscreen widgets [3/n])
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -293,14 +288,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     @Override
     protected void onInit() {
         mKeyguardSliceViewController.init();
-
-        if (!migrateClocksToBlueprint()) {
         mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
         mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         mCurrentWeatherView = mView.findViewById(R.id.weather_container);
         mCustomClock = mView.findViewById(R.id.clock_ls);
         mCustomClockFrame = mView.findViewById(R.id.clock_frame);
         mLsWidgets = (LockScreenWidgets) mView.findViewById(R.id.keyguard_widgets);
+
+        if (!migrateClocksToBlueprint()) {
+            mSmallClockFrame = mView.findViewById(R.id.lockscreen_clock_view);
+            mLargeClockFrame = mView.findViewById(R.id.lockscreen_clock_view_large);
         }
 
 
