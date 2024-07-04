@@ -652,7 +652,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mForceFlingAnimationForTest = false;
 
     private boolean mShowDimissButton;
-    private final PowerManagerInternal mLocalPowerManager;
 
     private boolean mBlockedGesturalNavigation = false;
 
