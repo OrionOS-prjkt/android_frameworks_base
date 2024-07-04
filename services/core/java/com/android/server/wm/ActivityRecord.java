@@ -314,6 +314,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.gui.DropInputMode;
 import android.hardware.HardwareBuffer;
+import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -322,6 +323,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.PersistableBundle;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -410,8 +412,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import android.util.RisingBoostFramework;
 
 /**
  * An entry in the history task, representing an activity.
@@ -6322,13 +6322,13 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
-            RisingBoostFramework.getInstance().perfBoost(RisingBoostFramework.WorkloadType.LAUNCH, true);
-
+            setActivityBoost(true);
             try {
                 mAtmService.getLifecycleManager().scheduleTransactionItem(app.getThread(),
                         StartActivityItem.obtain(token, takeSceneTransitionInfo()));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
+                setActivityBoost(false);
             }
             // The activity may be waiting for stop, but that is no longer appropriate if we are
             // starting the activity again
@@ -6957,9 +6957,16 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
         }
     }
 
+    protected void setActivityBoost(boolean enable) {
+        PowerManagerInternal powerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        if (powerManagerInternal != null) {
+            powerManagerInternal.setPowerMode(Mode.LAUNCH, enable);
+        }
+    }
+
     /** Called when the windows associated app window container are drawn. */
     private void onWindowsDrawn() {
-        RisingBoostFramework.getInstance().perfBoost(RisingBoostFramework.WorkloadType.LAUNCH, false);
+        setActivityBoost(false);
         final TransitionInfoSnapshot info = mTaskSupervisor
                 .getActivityMetricsLogger().notifyWindowsDrawn(this);
         final boolean validInfo = info != null;
@@ -7701,15 +7708,6 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
     @VisibleForTesting
     boolean shouldAnimate() {
         return task == null || task.shouldAnimate();
-    }
-
-    public int isAppInfoGame() {
-        int isGame = 0;
-        if (info.applicationInfo != null) {
-            isGame = (info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME ||
-                      (info.applicationInfo.flags & ApplicationInfo.FLAG_IS_GAME) == ApplicationInfo.FLAG_IS_GAME) ? 1 : 0;
-        }
-        return isGame;
     }
 
     /**

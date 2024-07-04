@@ -131,8 +131,6 @@ import javax.inject.Inject;
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
-import android.util.RisingBoostFramework;
-
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
  * and toggles the UDFPS display mode.
@@ -233,10 +231,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     private boolean mOnFingerDown;
     private boolean mAttemptedToDismissKeyguard;
     private final Set<Callback> mCallbacks = new HashSet<>();
-
-    // Boostframework for UDFPS
-    private RisingBoostFramework mPerf = null;
-    private boolean mIsPerfLockAcquired = false;
 
     private boolean mUseFrameworkDimming;
     private int[][] mBrightnessAlphaArray;
@@ -872,7 +866,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 mUdfpsAnimation.updatePosition();
             }
         }
-        mPerf = RisingBoostFramework.getInstance();
     }
 
     private void isSmartPixelsEnabled() {
@@ -991,11 +984,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             }
         } else {
             Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
-        }
-
-        if (mPerf != null && !mIsPerfLockAcquired) {
-            mPerf.perfBoost(RisingBoostFramework.WorkloadType.LAUNCH);
-            mIsPerfLockAcquired = true;
         }
     }
 
@@ -1128,10 +1116,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             return;
         }
         cancelAodSendFingerUpAction();
-
-        if (mPerf != null && mIsPerfLockAcquired) {
-            mIsPerfLockAcquired = false;
-        }
         if (mOverlay != null && mOverlay.getTouchOverlay() != null) {
             onFingerUp(mOverlay.getRequestId(), mOverlay.getTouchOverlay());
         }
