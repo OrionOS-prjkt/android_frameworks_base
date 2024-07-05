@@ -30,11 +30,7 @@ public class RisingServicesStarter {
     }
 
     public void startAllServices() {
-<<<<<<< HEAD
-        startService(QUICKSWITCH_SERVICE_CLASS);
         startService(ADAPTIVE_SOUND_ENGINE_SERVICE_CLASS);
-=======
->>>>>>> parent of 21c42867455e (base: Introduce built-in QuickSwitch feature [1/2])
     }
 
     private void startService(String serviceClassName) {
