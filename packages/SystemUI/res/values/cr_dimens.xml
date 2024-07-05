@@ -18,7 +18,7 @@
 
     <!-- The height of the WiFi toggle layout in Internet panel -->
     <dimen name="internet_dialog_wifi_toggle_height">56dp</dimen>
-
+    
     <!-- Height of the landscape battery icon in the status bar. -->
     <dimen name="status_bar_battery_icon_height_landscape">10.5dp</dimen>
 
@@ -108,7 +108,4 @@
     <!-- Island notification -->
     <dimen name="island_icon_size">48dp</dimen>
     <dimen name="island_side_margin">12dp</dimen>
-
-    <!-- Base Multiplier for dp to px. -->
-    <dimen name="amb_font_base_multiplier_dp">1dp</dimen>
 </resources>
