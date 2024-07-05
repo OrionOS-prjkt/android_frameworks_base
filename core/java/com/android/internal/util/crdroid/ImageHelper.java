@@ -58,14 +58,9 @@ import android.renderscript.Allocation;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.renderscript.RenderScript;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.view.Display;
-import android.view.SurfaceControl;
-import android.view.View;
-import android.view.WindowManager;
 
 public class ImageHelper {
     private static final int VECTOR_WIDTH = 512;
