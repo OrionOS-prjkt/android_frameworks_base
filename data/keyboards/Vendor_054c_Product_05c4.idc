@@ -66,5 +66,5 @@ gestureProp.Tap_Exclusion_Border_Width = 0
 gestureProp.Point_X_Out_Scale = 2.5
 gestureProp.Point_Y_Out_Scale = 2.5
 
-# TODO(b/351326684): Ideally "Scroll X Out Scale" and "Scroll Y Out Scale"
-# should be adjusted as well. Currently not supported in IDC files.
+# TODO: Ideally "Scroll X Out Scale" and "Scroll Y Out Scale" should be
+# adjusted as well. Currently not supported in idc files (b/351326684).
