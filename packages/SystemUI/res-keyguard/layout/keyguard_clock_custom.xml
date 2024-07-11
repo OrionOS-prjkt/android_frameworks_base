@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:gravity="center_horizontal"
     android:layout_gravity="center"
     android:orientation="vertical"
@@ -7,8 +9,8 @@
     android:padding="10dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp"
-    android:backgroundTint="#FF1B1D1F"
+    android:layout_marginTop="5dp"
+    android:backgroundTint="?androidprv:attr/colorSurface"
     android:layout_marginHorizontal="16dp">
     <LinearLayout
         android:gravity="center"
@@ -109,7 +111,7 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-    <com.android.systemui.afterlife.LsWidget
+    <com.android.systemui.clocks.LsWidget
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <LinearLayout
@@ -227,5 +229,5 @@
                 </FrameLayout>
             </LinearLayout>
         </LinearLayout>
-    </com.android.systemui.afterlife.LsWidget>
+    </com.android.systemui.clocks.LsWidget>
 </LinearLayout>
