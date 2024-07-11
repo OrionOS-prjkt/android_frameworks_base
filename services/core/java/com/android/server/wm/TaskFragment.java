@@ -1505,8 +1505,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 dc.prepareAppTransition(TRANSIT_NONE);
             } else {
                 dc.prepareAppTransition(TRANSIT_OPEN);
+                // Send interaction hint to boost onDraw performance
                 if (mPowerManagerInternal != null) {
-                    mPowerManagerInternal.setPowerBoost(Boost.DISPLAY_UPDATE_IMMINENT, 80);
+                    mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 80);
                 }
             }
         }
