@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top">
+
+    <LinearLayout
+        android:id="@+id/clock_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:foregroundGravity="center"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/date_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <TextClock
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:format12Hour="EEE, d MMM"
+                android:format24Hour="EEE, d MMM"
+                android:fontFamily="@font/hercules-text"
+                android:textSize="@dimen/nt_date_size" 
+                android:textColor="@android:color/white"
+                android:paddingTop="9dp"
+                android:paddingBottom="9dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/clock_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <TextClock
+                android:id="@+id/clock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:fontFamily="@font/hercules-text"
+                android:format12Hour="h:mm"
+                android:format24Hour="kk:mm"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/nt_clock_size" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
