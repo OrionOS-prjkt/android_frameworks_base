@@ -666,8 +666,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     }
 
     protected void doActivityBoost() {
+        // Send interaction hint to boost onDraw performance
         if (mPowerManagerInternal != null) {
-            mPowerManagerInternal.setPowerBoost(Boost.DISPLAY_UPDATE_IMMINENT, 80);
+            mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 80);
         }
     }
 
