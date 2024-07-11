@@ -562,7 +562,7 @@ public class DisplayPolicy {
                     if (started) {
                         if (mService.mPowerManagerInternal != null) {
                             mService.mPowerManagerInternal.setPowerBoost(
-                                 Boost.DISPLAY_UPDATE_IMMINENT, 500);
+                                 Boost.INTERACTION, 500);
                         }
                     }
                 }
