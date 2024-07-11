@@ -1293,6 +1293,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (mUdfpsAnimation != null) {
             mUdfpsAnimation.show();
         }
+        // Send interaction power boost to improve redraw performance for the ripple animation.
+        if (mLocalPowerManager != null) {
+            mLocalPowerManager.setPowerBoost(Boost.INTERACTION, 200);
+        }
     }
 
     private void onFingerUp(long requestId, @NonNull View view) {
