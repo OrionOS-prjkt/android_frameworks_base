@@ -2248,8 +2248,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 }
             });
         }
+        // Send interaction power boost to improve redraw performance during fling animation
         if (mLocalPowerManager != null) {
-            mLocalPowerManager.setPowerBoost(Boost.DISPLAY_UPDATE_IMMINENT, 200);
+            mLocalPowerManager.setPowerBoost(Boost.INTERACTION, 200);
         }
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
