@@ -20,7 +20,6 @@ public class VolumeProgressImageView extends ImageView {
     private int mVolumePercent = -1;
     private Handler mHandler;
     private Runnable mVolumeUpdater;
-    private Bitmap mCurrentBitmap;
 
     public VolumeProgressImageView(Context context) {
         super(context);
@@ -83,8 +82,7 @@ public class VolumeProgressImageView extends ImageView {
     }
 
     private void updateImageView() {
-        recycleBitmap();
-        mCurrentBitmap = ArcProgressWidget.generateBitmap(
+        Bitmap widgetBitmap = ArcProgressWidget.generateBitmap(
                 mContext,
                 mVolumePercent == - 1 ? 0 : mVolumePercent,
                 mVolumePercent == - 1 ? "..." : String.valueOf(mVolumePercent) + "%",
@@ -92,13 +90,6 @@ public class VolumeProgressImageView extends ImageView {
                 ContextCompat.getDrawable(mContext, R.drawable.ic_volume_up),
                 36
         );
-        setImageBitmap(mCurrentBitmap);
-    }
-    
-    private void recycleBitmap() {
-        if (mCurrentBitmap != null && !mCurrentBitmap.isRecycled()) {
-            mCurrentBitmap.recycle();
-            mCurrentBitmap = null;
-        }
+        setImageBitmap(widgetBitmap);
     }
 }
