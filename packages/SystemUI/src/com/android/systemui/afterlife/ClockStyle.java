@@ -58,7 +58,7 @@ public class ClockStyle extends RelativeLayout implements TunerService.Tunable {
     public ClockStyle(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mHandler = Dependency.get(Dependency.MAIN_HANDLER);
+        mHandler = new Handler(context.getMainLooper());
         mThemeUtils = new ThemeUtils(context);
         Dependency.get(TunerService.class).addTunable(this, CLOCK_STYLE);
     }

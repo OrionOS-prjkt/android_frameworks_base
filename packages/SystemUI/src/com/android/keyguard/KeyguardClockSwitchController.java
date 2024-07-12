@@ -623,7 +623,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             clock.getSmallClock().getEvents().onTimeTick();
             clock.getLargeClock().getEvents().onTimeTick();
         }
-        if (mEnableCustomClock && mCustomClock != null) {
+        if (mCustomClock != null) {
         	((ClockStyle) mCustomClock).onTimeChanged();
         }
     }
@@ -673,11 +673,19 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             // into the computation manually.
             int frameHeight = mLargeClockFrame.getHeight();
             int clockHeight = clock.getLargeClock().getView().getHeight();
-            return frameHeight / 2 + clockHeight / 2 + mKeyguardLargeClockTopMargin / -2;
+            if (!mEnableCustomClock) {
+                return frameHeight / 2 + clockHeight / 2 + mKeyguardLargeClockTopMargin / -2;
+            } else {
+            	return 0;
+            }
             
         } else {
             int clockHeight = clock.getSmallClock().getView().getHeight();
-            return clockHeight + statusBarHeaderHeight + mKeyguardSmallClockTopMargin;
+            if (!mEnableCustomClock) {
+                return clockHeight + statusBarHeaderHeight + mKeyguardSmallClockTopMargin;
+            } else {
+            	return 0;
+            }
         }
     }
 
@@ -691,9 +699,17 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
 
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
-        	return clock.getLargeClock().getView().getHeight();
+        	if (!mEnableCustomClock) {
+                return clock.getLargeClock().getView().getHeight();
+            } else {
+            	return 0;
+            }
         } else {
-            return clock.getSmallClock().getView().getHeight();
+            if (!mEnableCustomClock) {
+                return clock.getSmallClock().getView().getHeight();
+            } else {
+            	return 0;
+            }
         }
     }
 
@@ -770,26 +786,50 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
     
     private void updateCustomClock() {
+        ViewGroup.LayoutParams smallClockParams = mSmallClockFrame.getLayoutParams();
+        ViewGroup.LayoutParams largeClockParams = mLargeClockFrame.getLayoutParams();
         RelativeLayout.LayoutParams newStatusAreaParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         newStatusAreaParams.addRule(RelativeLayout.BELOW, mEnableCustomClock ? R.id.clock_ls : R.id.lockscreen_clock_view);
-        if (mStatusArea != null) {
-            RelativeLayout.LayoutParams currentParams = (RelativeLayout.LayoutParams) mStatusArea.getLayoutParams();
-            if (!paramsEquals(currentParams, newStatusAreaParams)) {
-                mStatusArea.setLayoutParams(newStatusAreaParams);
-            }
+        if (mStatusArea != null 
+            && !paramsEquals(mStatusArea.getLayoutParams(), ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, mEnableCustomClock ? R.id.clock_ls : R.id.lockscreen_clock_view)) {
+            mStatusArea.setLayoutParams(newStatusAreaParams);
         }
-        int smallClockVisibility = mEnableCustomClock ? View.GONE : View.VISIBLE;
-        int largeClockVisibility = mEnableCustomClock ? View.GONE : View.VISIBLE;
-        int customClockVisibility = mEnableCustomClock ? View.VISIBLE : View.GONE;
-        mSmallClockFrame.setVisibility(smallClockVisibility);
-        mLargeClockFrame.setVisibility(largeClockVisibility);
-        mCustomClockFrame.setVisibility(customClockVisibility);
+        if (mEnableCustomClock) {
+            if (!paramsEquals(smallClockParams, 0, 0, 0)) {
+                smallClockParams.width = 0;
+                smallClockParams.height = 0;
+                mSmallClockFrame.setLayoutParams(smallClockParams);
+            }
+            if (!paramsEquals(largeClockParams, 0, 0, 0)) {
+                largeClockParams.width = 0;
+                largeClockParams.height = 0;
+                mLargeClockFrame.setLayoutParams(largeClockParams);
+            }
+            mCustomClockFrame.setVisibility(View.VISIBLE);
+        } else {
+            if (!paramsEquals(smallClockParams, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 0)) {
+                smallClockParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                smallClockParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                mSmallClockFrame.setLayoutParams(smallClockParams);
+            }
+            if (!paramsEquals(largeClockParams, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0)) {
+                largeClockParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                largeClockParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                mLargeClockFrame.setLayoutParams(largeClockParams);
+            }
+            mCustomClockFrame.setVisibility(View.GONE);
+        }
     }
 
-    private boolean paramsEquals(RelativeLayout.LayoutParams params1, RelativeLayout.LayoutParams params2) {
-        return params1.width == params2.width && params1.height == params2.height &&
-               params1.getRules()[RelativeLayout.BELOW] == params2.getRules()[RelativeLayout.BELOW];
+    private boolean paramsEquals(ViewGroup.LayoutParams params1, int width, int height, int belowRule) {
+        if (params1 instanceof RelativeLayout.LayoutParams) {
+            RelativeLayout.LayoutParams relativeParams = (RelativeLayout.LayoutParams) params1;
+            return relativeParams.width == width && relativeParams.height == height &&
+                   relativeParams.getRules()[RelativeLayout.BELOW] == belowRule;
+        } else {
+            return params1.width == width && params1.height == height;
+        }
     }
 
     private void setDateWeatherVisibility() {
