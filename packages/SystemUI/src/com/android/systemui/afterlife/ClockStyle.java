@@ -1,4 +1,4 @@
-package com.android.systemui.clocks;
+package com.android.systemui.afterlife;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,18 +23,22 @@ public class ClockStyle extends RelativeLayout implements TunerService.Tunable {
             R.id.keyguard_clock_style_ios,
             R.id.keyguard_clock_style_cos,
             R.id.keyguard_clock_style_custom,
+            R.id.keyguard_clock_style_custom1,
+            R.id.keyguard_clock_style_custom2,
+            R.id.keyguard_clock_style_custom3,
             R.id.keyguard_clock_style_miui,
             R.id.keyguard_clock_style_ide,
+            R.id.keyguard_clock_style_lottie,
+            R.id.keyguard_clock_style_lottie2,
+            R.id.keyguard_clock_style_fluid,
             R.id.keyguard_clock_style_hyper,
             R.id.keyguard_clock_style_dual,
             R.id.keyguard_clock_style_stylish,
             R.id.keyguard_clock_style_sidebar,
             R.id.keyguard_clock_style_minimal,
             R.id.keyguard_clock_style_minimal2,
-            R.id.keyguard_clock_nothing3
+            R.id.keyguard_clock_style_minimal3
     };
-    
-    int[] centerClocks = {2, 4, 9, 11, 12, 13};
 
     private static final int DEFAULT_STYLE = 0; // Disabled
     private static final String CLOCK_STYLE_KEY = "clock_style";
@@ -60,13 +64,17 @@ public class ClockStyle extends RelativeLayout implements TunerService.Tunable {
     }
 
     private void enableClockOverlays(boolean enable) {
-        boolean isCenterClock = false;
-        for (int clockStyle : centerClocks) {
-            if (clockStyle == mClockStyle) {
-                isCenterClock = true;
-                break;
-            }
-        }
+        boolean isCenterClock = mClockStyle == 2 
+            || mClockStyle == 4 
+            || mClockStyle == 5 
+            || mClockStyle == 9 
+            || mClockStyle == 10 
+            || mClockStyle == 11 
+            || mClockStyle == 12 
+            || mClockStyle == 15 
+            || mClockStyle == 17 
+            || mClockStyle == 18 
+            || mClockStyle == 19;
         mThemeUtils.setOverlayEnabled(
                 "android.theme.customization.smartspace",
                 enable ? "com.android.systemui.hide.smartspace" : "com.android.systemui",
