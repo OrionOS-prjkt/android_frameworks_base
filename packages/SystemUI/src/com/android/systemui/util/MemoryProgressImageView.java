@@ -14,7 +14,6 @@ public class MemoryProgressImageView extends ImageView {
 
     private Context mContext;
     private ActivityManager mActivityManager;
-    private Bitmap mCurrentBitmap;
 
     public MemoryProgressImageView(Context context) {
         super(context);
@@ -45,12 +44,11 @@ public class MemoryProgressImageView extends ImageView {
     }
 
     private void updateImageView() {
-        recycleBitmap();
         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
         mActivityManager.getMemoryInfo(memoryInfo);
         long usedMemory = memoryInfo.totalMem - memoryInfo.availMem;
         int usedMemoryPercentage = (int) ((usedMemory * 100) / memoryInfo.totalMem);
-        mCurrentBitmap = ArcProgressWidget.generateBitmap(
+        Bitmap widgetBitmap = ArcProgressWidget.generateBitmap(
                 mContext,
                 usedMemoryPercentage,
                 String.valueOf(usedMemoryPercentage) + "%",
@@ -58,13 +56,6 @@ public class MemoryProgressImageView extends ImageView {
                 "RAM",
                 28
         );
-        setImageBitmap(mCurrentBitmap);
-    }
-    
-    private void recycleBitmap() {
-        if (mCurrentBitmap != null && !mCurrentBitmap.isRecycled()) {
-            mCurrentBitmap.recycle();
-            mCurrentBitmap = null;
-        }
+        setImageBitmap(widgetBitmap);
     }
 }
