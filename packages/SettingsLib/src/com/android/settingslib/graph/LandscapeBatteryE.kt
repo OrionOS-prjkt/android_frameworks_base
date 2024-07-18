@@ -32,8 +32,6 @@ import android.graphics.drawable.Drawable
 import android.util.PathParser
 import android.util.TypedValue
 
-import androidx.core.content.ContextCompat
-
 import com.android.settingslib.R
 import com.android.settingslib.Utils
 
@@ -41,7 +39,7 @@ import com.android.settingslib.Utils
  * A battery meter drawable that respects paths configured in
  * frameworks/base/core/res/res/values/config.xml to allow for an easily overrideable battery icon
  */
-open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) : Drawable() {
+open class LandscapeBatteryE(private val context: Context, frameColor: Int) : Drawable() {
 
     // Need to load:
     // 1. perimeter shape
@@ -54,6 +52,8 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     // Fill will cover the whole bounding rect of the fillMask, and be masked by the path
     private val fillMask = Path()
     private val scaledFill = Path()
+    private val fillOutlinePath = Path()
+    private val scaledfillOutline = Path()
     // Based off of the mask, the fill will interpolate across this space
     private val fillRect = RectF()
     // Top of this rect changes based on level, 100% == fillRect
@@ -82,30 +82,25 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     // Colors can be configured based on battery level (see res/values/arrays.xml)
     private var colorLevels: IntArray
 
-    private val textColorPrimary: Int = ContextCompat.getColor(context, R.color.settingslib_text_color_primary)
-    private var fillColor: Int = textColorPrimary
-    private var backgroundColor: Int = textColorPrimary
+    private var fillColor: Int = Color.MAGENTA
+    private var backgroundColor: Int = Color.MAGENTA
     // updated whenever level changes
-    private var levelColor: Int = textColorPrimary
+    private var levelColor: Int = Color.MAGENTA
 
     // Dual tone implies that battery level is a clipped overlay over top of the whole shape
     private var dualTone = false
 
     private var batteryLevel = 0
-    
-    private var isRotation = false
+
     private var scaledFillAlpha = false
     private var scaledPerimeterAlpha = false
     private var customBlendColor = false
-    private var idcSwitch = false
 
     private var chargingColor: Int = Color.TRANSPARENT
     private var customFillColor: Int = Color.BLACK
     private var customFillGradColor: Int = Color.BLACK
     private var powerSaveColor: Int = Color.TRANSPARENT
     private var powerSaveFillColor: Int = Color.TRANSPARENT
-
-    private var ichargingBoltColor: Int = Color.TRANSPARENT
 
     private val invalidateRunnable: () -> Unit = {
         invalidateSelf()
@@ -131,9 +126,14 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             field = value
             postInvalidate()
         }
-        
+
+    var customChargingIcon = false
+        set(value) {
+            field = value
+            postInvalidate()
+        }
+
     public open fun customizeBatteryDrawable(
-        isRotation: Boolean,
         scaledPerimeterAlpha: Boolean,
         scaledFillAlpha: Boolean,
         customBlendColor: Boolean,
@@ -142,7 +142,6 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         chargingColor: Int,
         powerSaveColor: Int,
         powerSaveFillColor: Int) {
-        this.isRotation = isRotation
         this.scaledPerimeterAlpha = scaledPerimeterAlpha
         this.scaledFillAlpha = scaledFillAlpha
         this.customBlendColor = customBlendColor
@@ -151,14 +150,6 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         this.chargingColor = chargingColor
         this.powerSaveColor = powerSaveColor
         this.powerSaveFillColor = powerSaveFillColor
-    }
-
-    private val chargingBoltColor = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.color =  Utils.getColorStateListDefaultColor(context, R.color.cargingbolt_single_tone)
-        p.alpha = 255
-        p.isDither = true
-        p.strokeWidth = 0f
-        p.style = Paint.Style.FILL_AND_STROKE
     }
 
     private val fillColorStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
@@ -190,14 +181,14 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     private val errorPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
-        p.color = Utils.getColorStateListDefaultColor(context, R.color.batterymeter_saver_color)
+        p.color = Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color)
         p.alpha = 255
         p.isDither = true
         p.strokeWidth = 0f
         p.style = Paint.Style.FILL_AND_STROKE
         p.blendMode = BlendMode.SRC
     }
-    
+
     private val chargingPaint = Paint(Paint.ANTI_ALIAS_FLAG).also { p ->
         p.color = frameColor
     }
@@ -271,15 +262,15 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         levelPath.reset()
         levelRect.set(fillRect)
         val fillFraction = batteryLevel / 100f
-        val fillTop =
-                if (batteryLevel >= 95)
-                    fillRect.top
+        val fillLeft =
+                if (batteryLevel == 100)
+                    fillRect.left
                 else
-                    fillRect.top + (fillRect.height() * (1 - fillFraction))
+                    fillRect.left + (fillRect.width() * (1 - fillFraction))
 
-        levelRect.top = Math.floor(fillTop.toDouble()).toFloat()
+        levelRect.left = Math.floor(fillLeft.toDouble()).toFloat()
         levelPath.addRect(levelRect, Path.Direction.CCW)
-        
+
         scaledFillPaint.alpha = if (scaledFillAlpha) 100 else 0
         scaledPerimeterPaint.alpha = if (scaledPerimeterAlpha) 100 else scaledPerimeterPaintDef.getAlpha()
 
@@ -294,8 +285,23 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         fillPaint.color = levelColor
         val BLACK = Color.BLACK
 
+        if (customBlendColor) {
+            chargingPaint.color =
+            if (chargingColor == Color.BLACK) Color.TRANSPARENT else chargingColor
+
+            powerSavePaint.color =
+            if (powerSaveColor == Color.BLACK) Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color) else powerSaveColor
+
+            powerSaveFillPaint.color =
+            if (powerSaveFillColor == Color.BLACK) Color.TRANSPARENT else powerSaveFillColor
+        } else {
+            chargingPaint.color = Color.TRANSPARENT
+            powerSavePaint.color = Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color)
+            powerSaveFillPaint.color = Color.TRANSPARENT
+        }
+
         // Deal with unifiedPath clipping before it draws
-        if (charging && !idcSwitch) {
+        if (charging && !customChargingIcon) {
             // Clip out the bolt shape
             unifiedPath.op(scaledBolt, Path.Op.DIFFERENCE)
             if (!invertFillIcon) {
@@ -307,10 +313,11 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             // Dual tone means we draw the shape again, clipped to the charge level
             c.drawPath(unifiedPath, dualToneBackgroundFill)
             c.save()
-            c.clipRect(0f,
-                    bounds.bottom - bounds.height() * fillFraction,
+            c.clipRect(
+                    0f,
+                    bounds.left - bounds.width() * fillFraction,
                     bounds.right.toFloat(),
-                    bounds.bottom.toFloat())
+                    bounds.left.toFloat())
             c.drawPath(unifiedPath, fillPaint)
             c.restore()
         } else {
@@ -319,121 +326,132 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
             if (customBlendColor) {
                 if (charging) {
                     fillPaint.color = fillColor
+                    c.clipOutPath(scaledfillOutline)
                     c.drawPath(unifiedPath, fillPaint)
                     fillPaint.color = levelColor
+                } else if (powerSaveEnabled) {
+                    c.drawPath(scaledErrorPerimeter, powerSavePaint)
+                    c.clipOutPath(scaledfillOutline)
+                    c.drawPath(levelPath, fillPaint)
+                    c.drawPath(levelPath, powerSaveFillPaint)
                 } else {
-                    // Show colorError below this level
-                    if (batteryLevel <= Companion.CRITICAL_LEVEL) {
-                        c.save()
-                        c.clipPath(scaledFill)
-                        c.drawPath(levelPath, fillPaint)
-                        c.restore()
-                    } else {
-                        customFillPaint.color = customFillColor
-                        customFillPaint.shader =
-                        if (customFillColor != BLACK && customFillGradColor != BLACK) LinearGradient(
-                            levelRect.right, 0f, 0f, levelRect.bottom,
-                            customFillColor, customFillGradColor,
-                            Shader.TileMode.CLAMP) else null
-                        c.drawPath(levelPath, if (customFillColor == BLACK) fillPaint else customFillPaint)
-                    }
+                    c.clipOutPath(scaledfillOutline)
+                    customFillPaint.color = customFillColor
+                    customFillPaint.shader =
+                    if (customFillColor != BLACK && customFillGradColor != BLACK) LinearGradient(
+                        levelRect.left, 0f, 0f, levelRect.bottom,
+                        customFillGradColor, customFillColor,
+                        Shader.TileMode.CLAMP) else null
+                    c.drawPath(levelPath, if (customFillColor == Color.BLACK) fillPaint else customFillPaint)
                 }
             } else {
-                // Show colorError below this level
-                if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
-                    c.save()
-                    c.clipPath(scaledFill)
+                if (charging) {
+                    fillPaint.color = fillColor
+                    c.clipOutPath(scaledfillOutline)
+                    c.drawPath(unifiedPath, fillPaint)
+                    fillPaint.color = levelColor
+                } else if (powerSaveEnabled) {
+                    c.drawPath(scaledErrorPerimeter, errorPaint)
+                    c.clipOutPath(scaledfillOutline)
                     c.drawPath(levelPath, fillPaint)
-                    c.restore()
                 } else {
                     fillPaint.color = fillColor
+                    c.clipOutPath(scaledfillOutline)
                     c.drawPath(unifiedPath, fillPaint)
                     fillPaint.color = levelColor
                 }
             }
+
+            // Show colorError below this level
+            if (batteryLevel <= Companion.CRITICAL_LEVEL && !charging) {
+                c.save()
+                c.clipPath(scaledFill)
+                c.drawPath(levelPath, fillPaint)
+                c.restore()
+            }
         }
 
-        if (customBlendColor) {
-            chargingPaint.color =
-            if (chargingColor == BLACK) Color.TRANSPARENT else chargingColor
-
-            powerSavePaint.color =
-            if (powerSaveColor == BLACK) Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color) else powerSaveColor
-
-            powerSaveFillPaint.color =
-            if (powerSaveFillColor == BLACK) Color.TRANSPARENT else powerSaveFillColor
-        } else {
-            chargingPaint.color = Color.TRANSPARENT
-            powerSavePaint.color = Utils.getColorStateListDefaultColor(context, R.color.batterymeter_plus_color)
-            powerSaveFillPaint.color = Color.TRANSPARENT
-        }
-
-        if (charging && !idcSwitch) {
-            c.clipOutPath(scaledBolt)
-            if (invertFillIcon) {
-                c.drawPath(scaledBolt, fillColorStrokePaint)
+        if (charging) {
+            if (!customChargingIcon) {
+                c.clipOutPath(scaledBolt)
+                c.drawPath(levelPath, chargingPaint)
+                if (invertFillIcon) {
+                    c.drawPath(scaledBolt, fillColorStrokePaint)
+                } else {
+                    c.drawPath(scaledBolt, fillColorStrokeProtection)
+                }
             } else {
-                c.drawPath(scaledBolt, fillColorStrokeProtection)
+                c.drawPath(levelPath, chargingPaint)
             }
         } else if (powerSaveEnabled) {
-            // If power save is enabled draw the level path with colorError
-            c.drawPath(levelPath, errorPaint)
+            // If power save is enabled draw the perimeter path with colorError
+            c.drawPath(scaledErrorPerimeter, powerSavePaint)
+            c.drawPath(levelPath, powerSaveFillPaint)
             // And draw the plus sign on top of the fill
             if (!showPercent) {
-                fillPaint.color = fillColor
-                c.drawPath(scaledPlus, fillPaint)
+                c.drawPath(scaledPlus, powerSavePaint)
             }
         }
         c.restore()
 
-        if (!charging && batteryLevel < 100 && showPercent) {
-            textPaint.textSize = bounds.height() * 0.38f
-            val textHeight = -textPaint.fontMetrics.ascent
-            val pctX = bounds.width() * 0.5f
-            val pctY = (bounds.height() + textHeight) * 0.5f
-            
+        var state = false
+        if (customChargingIcon && charging) {
+            state = true
+        } else if (customChargingIcon && !charging) {
+            state = true
+        } else if (!customChargingIcon && charging) {
+            state = false
+        } else if (!customChargingIcon && !charging) {
+            state = true
+        }
+
+        if (showPercent && state) {
+            textPaint.textSize = bounds.width() * 0.20f
+            val textHeight = +textPaint.fontMetrics.ascent
+            val pctX = (bounds.width() + textHeight)* 0.84f
+            val pctY = bounds.height() * 0.61f
+
             if (customBlendColor) {
-                if (powerSaveEnabled && powerSaveFillColor == BLACK) {
+                if (powerSaveEnabled && powerSaveFillColor == Color.BLACK) {
                     textPaint.color = fillColor
                     c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
 
                     textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
                     c.save()
                     c.clipRect(
-                        if (isRotation) fillRect.left + (fillRect.width() * (1 - fillFraction)) else fillRect.left,
+                        fillRect.left + (fillRect.width() * (1 - fillFraction)),
                         fillRect.top,
-                        if (isRotation) fillRect.right else fillRect.right - (fillRect.width() * (1 - fillFraction)),
+                        fillRect.right,
                         fillRect.bottom)
                     c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
-                } else if (!powerSaveEnabled && customFillColor == BLACK) {
+                } else if (!powerSaveEnabled && customFillColor == Color.BLACK) {
                     textPaint.color = fillColor
                     c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
 
                     textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
                     c.save()
                     c.clipRect(
-                        if (isRotation) fillRect.left + (fillRect.width() * (1 - fillFraction)) else fillRect.left,
+                        fillRect.left + (fillRect.width() * (1 - fillFraction)),
                         fillRect.top,
-                        if (isRotation) fillRect.right else fillRect.right - (fillRect.width() * (1 - fillFraction)),
+                        fillRect.right,
                         fillRect.bottom)
                     c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
                 } else {
                     textPaint.color = fillColor
                     c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
                 }
-                
             } else {
+                textPaint.color = fillColor
+                c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
 
-            textPaint.color = fillColor
-            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
-
-            textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
-            c.save()
-            c.clipRect(fillRect.left,
-                    fillRect.top + (fillRect.height() * (1 - fillFraction)),
+                textPaint.color = fillColor.toInt().inv() or 0xFF000000.toInt()
+                c.save()
+                c.clipRect(
+                    fillRect.left + (fillRect.width() * (1 - fillFraction)),
+                    fillRect.top,
                     fillRect.right,
                     fillRect.bottom)
-            c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
+                c.drawText(batteryLevel.toString(), pctX, pctY, textPaint)
             }
             c.restore()
         }
@@ -501,7 +519,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
      * Set the fill level
      */
     public open fun setBatteryLevel(l: Int) {
-        invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
+        // invertFillIcon = if (l >= 67) true else if (l <= 33) false else invertFillIcon
         batteryLevel = l
         levelColor = batteryColorForLevel(batteryLevel)
         invalidateSelf()
@@ -530,7 +548,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
 
         fillPaint.color = fillColor
         fillColorStrokePaint.color = fillColor
-        
+
         scaledFillPaint.color = fillColor
         scaledPerimeterPaint.color = fillColor
         scaledPerimeterPaintDef.color = fillColor
@@ -561,6 +579,7 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
         errorPerimeterPath.transform(scaleMatrix, scaledErrorPerimeter)
         fillMask.transform(scaleMatrix, scaledFill)
         scaledFill.computeBounds(fillRect, true)
+        fillOutlinePath.transform(scaleMatrix, scaledfillOutline)
         boltPath.transform(scaleMatrix, scaledBolt)
         plusPath.transform(scaleMatrix, scaledPlus)
 
@@ -575,27 +594,32 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
 
     private fun loadPaths() {
         val pathString = context.resources.getString(
-                com.android.internal.R.string.config_batterymeterPerimeterPath)
+               R.string.config_landscapeBatteryPerimeterPathE)
         perimeterPath.set(PathParser.createPathFromPathData(pathString))
         perimeterPath.computeBounds(RectF(), true)
 
         val errorPathString = context.resources.getString(
-                com.android.internal.R.string.config_batterymeterErrorPerimeterPath)
+                R.string.config_landscapeBatteryErrorPerimeterPathE)
         errorPerimeterPath.set(PathParser.createPathFromPathData(errorPathString))
         errorPerimeterPath.computeBounds(RectF(), true)
 
         val fillMaskString = context.resources.getString(
-                com.android.internal.R.string.config_batterymeterFillMask)
+                R.string.config_landscapeBatteryFillMaskE)
         fillMask.set(PathParser.createPathFromPathData(fillMaskString))
         // Set the fill rect so we can calculate the fill properly
         fillMask.computeBounds(fillRect, true)
 
+        val fillOutlinePathString = context.resources.getString(
+                R.string.config_landscapeBatteryFillOutlineE)
+        fillOutlinePath.set(PathParser.createPathFromPathData(fillOutlinePathString))
+        fillOutlinePath.computeBounds(RectF(), true)
+
         val boltPathString = context.resources.getString(
-                com.android.internal.R.string.config_batterymeterBoltPath)
+                R.string.config_landscapeBatteryBoltPathE)
         boltPath.set(PathParser.createPathFromPathData(boltPathString))
 
         val plusPathString = context.resources.getString(
-                com.android.internal.R.string.config_batterymeterPowersavePath)
+                R.string.config_landscapeBatteryPowersavePathE)
         plusPath.set(PathParser.createPathFromPathData(plusPathString))
 
         dualTone = context.resources.getBoolean(
@@ -603,13 +627,15 @@ open class ThemedBatteryDrawable(private val context: Context, frameColor: Int) 
     }
 
     companion object {
-        const val WIDTH = 12f
-        const val HEIGHT = 20f
+        private const val TAG = "LandscapeBatteryE"
+        private const val WIDTH = 20f
+        private const val HEIGHT = 13f
         private const val CRITICAL_LEVEL = 15
-        // On a 12x20 grid, how wide to make the fill protection stroke.
+        // On a 20x13 grid, how wide to make the fill protection stroke.
         // Scales when our size changes
-        private const val PROTECTION_STROKE_WIDTH = 3f
+        private const val PROTECTION_STROKE_WIDTH = 2f
         // Arbitrarily chosen for visibility at small sizes
-        const val PROTECTION_MIN_STROKE_WIDTH = 6f
+        private const val PROTECTION_MIN_STROKE_WIDTH = 5f
     }
 }
+
