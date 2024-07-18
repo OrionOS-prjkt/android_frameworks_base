@@ -16,9 +16,12 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.util.qs.QSStyleUtils.isRoundQS;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -41,18 +44,37 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
     // A fallback value for max tiles number when setting via Tuner (parseNumTiles)
     public static final int TUNER_MAX_TILES_FALLBACK = 6;
 
+     private QSLogger mQsLogger;
+    // Tile Columns on normal conditions
+    public int mMaxColumnsPortrait = 5;
+    public int mMaxColumnsLandscape = 6;
+    // Tile Columns when media player is visible
+    public int mMaxColumnsMediaPlayer = 4;
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
 
     public QuickQSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setMaxTiles();
+        mMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
+        mMaxColumnsPortrait = getResources().getInteger(R.integer.quick_qs_panel_num_columns);
+        mMaxColumnsLandscape = getResources().getInteger(R.integer.quick_qs_panel_num_columns_landscape);
+        mMaxColumnsMediaPlayer = getResources().getInteger(R.integer.quick_qs_panel_num_columns_media);
+        if (isRoundQS()) {
+            mMaxColumnsPortrait = Settings.Secure.getInt(context.getContentResolver(),
+                    Settings.Secure.QQS_NUM_COLUMNS, mMaxColumnsPortrait);
+            mMaxColumnsLandscape = Settings.Secure.getInt(context.getContentResolver(),
+                    Settings.Secure.QQS_NUM_COLUMNS_LANDSCAPE, mMaxColumnsLandscape);
+
+            mMaxTiles = Math.max(mMaxColumnsPortrait, mMaxColumnsLandscape);
+            mMaxTiles = Math.max(mMaxColumnsMediaPlayer, mMaxTiles);
+        }
     }
 
-    @Override
+     @Override
     protected void setHorizontalContentContainerClipping() {
         mHorizontalContentContainer.setClipToPadding(false);
         mHorizontalContentContainer.setClipChildren(false);
+        updateColumns();
     }
 
     View getBrightnessView() {
@@ -76,6 +98,18 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
             }
             mBrightnessView.setLayoutParams(lp);
         }
+    }
+
+    public void updateColumns() {
+        boolean isLandscape = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+
+        int mColumnsMediaPlayer = mUsingHorizontalLayout ?
+            mMaxColumnsMediaPlayer :
+            mMaxColumnsLandscape;
+
+        mTileLayout.setMaxColumns(isLandscape ?
+            mColumnsMediaPlayer :
+            mMaxColumnsPortrait);
     }
 
     @Override
@@ -125,23 +159,13 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
     }
 
     @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        setMaxTiles();
-    }
-
-    public void setMaxTiles() {
-        int columns = TileUtils.getQSColumnsCount(mContext);
-        int maxTiles = columns * TileUtils.getQSRowsCount(mContext);
-
-        while (maxTiles > columns && (maxTiles % columns != 0)) {
-            maxTiles--;
+        protected void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+            updateResources();
         }
 
-        if (mMaxTiles != maxTiles) {
-            mMaxTiles = maxTiles;
-            requestLayout();
-        }
+    public void setMaxTiles(int maxTiles) {
+        mMaxTiles = maxTiles;
     }
 
     @Override
@@ -149,15 +173,8 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
         switch (key) {
             case QS_SHOW_BRIGHTNESS_SLIDER:
                 boolean value =
-                        TunerService.parseInteger(newValue, 1) > 1;
+                        TunerService.parseInteger(newValue, 2) > 1;
                 super.onTuningChanged(key, value ? newValue : "0");
-                break;
-            case QS_LAYOUT_COLUMNS:
-            case QS_LAYOUT_COLUMNS_LANDSCAPE:
-            case QQS_LAYOUT_ROWS:
-            case QQS_LAYOUT_ROWS_LANDSCAPE:
-                setMaxTiles();
-                super.onTuningChanged(key, newValue);
                 break;
             default:
                 super.onTuningChanged(key, newValue);
@@ -165,7 +182,6 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
     }
 
     public int getNumQuickTiles() {
-        setMaxTiles();
         return mMaxTiles;
     }
 
@@ -319,12 +335,5 @@ public class QuickQSPanel extends QSPanel implements TunerService.Tunable {
             mLastSelected = selected;
         }
 
-        @Override
-        public void updateSettings() {
-            updateResources();
-            mQSPanel.setMaxTiles();
-            updateMaxRows(10000, mRecords.size());
-            super.updateSettings();
-        }
     }
 }

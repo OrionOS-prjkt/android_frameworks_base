@@ -31,6 +31,10 @@ import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_BOTH;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_INDEX;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_SOURCE;
 import static com.android.systemui.theme.ThemeOverlayApplier.TIMESTAMP_FIELD;
+import static com.android.systemui.util.qs.QSStyleUtils.QS_STYLE_ROUND_OVERLAY;
+import static com.android.systemui.util.qs.QSStyleUtils.isRoundQSSetting;
+import static com.android.systemui.util.qs.QSStyleUtils.setRoundQS;
+
 
 import android.app.ActivityManager;
 import android.app.UiModeManager;
@@ -556,6 +560,63 @@ public class ThemeOverlayController implements CoreStartable, Dumpable, TunerSer
                     }
                 },
                 UserHandle.USER_ALL);
+
+              ContentObserver qsSettingsObserver = new ContentObserver(mBgHandler) {
+            @Override
+            public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
+                    int userId) {
+                if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
+                if (mUserTracker.getUserId() != userId) {
+                    return;
+                }
+                if (!mDeviceProvisionedController.isUserSetup(userId)) {
+                    Log.i(TAG, "Theme application deferred when setting changed.");
+                    mDeferredThemeEvaluation = true;
+                    return;
+                }
+                reevaluateSystemTheme(true /* forceReload */);
+            }
+        };
+
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.getUriFor(Settings.Secure.QS_NUM_COLUMNS),
+                false,
+                qsSettingsObserver,
+                UserHandle.USER_ALL);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.getUriFor(Settings.Secure.QQS_NUM_COLUMNS),
+                false,
+                qsSettingsObserver,
+                UserHandle.USER_ALL);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.getUriFor(Settings.Secure.QS_NUM_COLUMNS_LANDSCAPE),
+                false,
+                qsSettingsObserver,
+                UserHandle.USER_ALL);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.getUriFor(Settings.Secure.QQS_NUM_COLUMNS_LANDSCAPE),
+                false,
+                qsSettingsObserver,
+                UserHandle.USER_ALL);
+
+        boolean isRoundQS = isRoundQSSetting(mContext);
+        setRoundQS(isRoundQS);
+        mThemeManager.enableOverlay(QS_STYLE_ROUND_OVERLAY, isRoundQS);
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.getUriFor(Settings.Secure.QS_STYLE_ROUND),
+                false,
+                new ContentObserver(mBgHandler) {
+                    @Override
+                    public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
+                            int userId) {
+                        boolean isRoundQS = isRoundQSSetting(mContext);
+                        setRoundQS(isRoundQS);
+                        mThemeManager.enableOverlay(QS_STYLE_ROUND_OVERLAY, isRoundQS);
+                        reevaluateSystemTheme(true /* forceReload */);
+                    }
+                },
+                UserHandle.USER_ALL);
+
 
         mUserTracker.addCallback(mUserTrackerCallback, mBgExecutor);
 
