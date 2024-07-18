@@ -127,10 +127,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_STYLE);
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_DURATION);
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_INTERPOLATOR);
-        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS);
-        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS_LANDSCAPE);
-        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS);
-        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS_LANDSCAPE);
+        
 
         mView.setBrightnessRunnable(() -> {
             mView.updateResources();
@@ -138,6 +135,7 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
             updateBrightnessMirror();
         });
 
+        mView.updateColumns();
         mBrightnessMirrorHandler.onQsPanelAttached();
     }
 
@@ -174,6 +172,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
     public boolean isListening() {
         return mView.isListening();
     }
+   
+    private void setMaxTiles(int parseNumTiles) {
+        mView.setMaxTiles(parseNumTiles);
+        mView.updateColumns();
+        setTiles();
+    }
 
     @Override
     public void refreshAllTiles() {
@@ -181,10 +185,14 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel>
         super.refreshAllTiles();
     }
 
-    @Override
+        @Override
     protected void onConfigurationChanged() {
-        setTiles();
+        int newMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_tiles);
+        if (newMaxTiles != mView.getNumQuickTiles()) {
+            setMaxTiles(newMaxTiles);
+        }
         updateMediaExpansion();
+        mView.updateColumns();
     }
 
     @Override

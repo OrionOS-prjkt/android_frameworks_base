@@ -279,6 +279,19 @@ public class ThemeOverlayApplier implements Dumpable {
         });
     }
 
+
+     /* Enable overlays */
+    public void enableOverlay(String overlayName, boolean enable) {
+        mBgExecutor.execute(() -> {
+            try {
+                mOverlayManager.setEnabled(overlayName, enable, UserHandle.SYSTEM);
+            } catch (SecurityException | IllegalStateException e) {
+                Log.e(TAG, "Failed to enable overlay", e);
+            }
+        });
+    }
+
+
     @VisibleForTesting
     protected OverlayManagerTransaction.Builder getTransactionBuilder() {
         return new OverlayManagerTransaction.Builder();

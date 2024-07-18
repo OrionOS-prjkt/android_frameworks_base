@@ -1,6 +1,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
+import static com.android.systemui.util.qs.QSStyleUtils.isRoundQS;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -52,6 +53,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private final boolean mLessRows;
     private int mMinRows = 1;
     private int mMaxColumns = NO_MAX_COLUMNS;
+     protected int mResourceColumns;
     private float mSquishinessFraction = 1f;
     protected int mLastTileBottom;
     protected TextView mTempTextView;
@@ -110,6 +112,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mMaxColumns = maxColumns;
         return updateColumns();
     }
+    
+    @Override
+    public int getMaxColumns() {
+        return mMaxColumns;
+    }
 
     public void addTile(TileRecord tile) {
         mRecords.add(tile);
@@ -138,6 +145,10 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateResources() {
         Resources res = getResources();
+        int columns = useSmallLandscapeLockscreenResources()
+                ? res.getInteger(R.integer.small_land_lockscreen_quick_settings_num_columns)
+                : res.getInteger(R.integer.quick_qs_panel_max_tiles);
+        mResourceColumns = Math.max(1, columns);
         mResourceCellHeight = res.getDimensionPixelSize(mResourceCellHeightResId);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mSidePadding = useSidePadding() ? mCellMarginHorizontal / 2 : 0;
@@ -145,14 +156,18 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         int rows = useSmallLandscapeLockscreenResources()
                 ? res.getInteger(R.integer.small_land_lockscreen_quick_settings_max_rows)
                 : res.getInteger(R.integer.quick_settings_max_rows);
-        mMaxAllowedRows = Math.max(getResourceRows(), rows);
+        mMaxAllowedRows = Math.max(1, rows);
         if (mLessRows) {
             mMaxAllowedRows = Math.max(mMinRows, mMaxAllowedRows - 1);
         }
         // update estimated cell height under current font scaling
-        mTempTextView.dispatchConfigurationChanged(res.getConfiguration());
+        mTempTextView.dispatchConfigurationChanged(mContext.getResources().getConfiguration());
         estimateCellHeight();
-        return updateColumns();
+        if (updateColumns()) {
+            requestLayout();
+            return true;
+        }
+        return false;
     }
 
     // TODO (b/293252410) remove condition here when flag is launched
@@ -172,12 +187,11 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
 
     public boolean updateColumns() {
         int oldColumns = mColumns;
-        mColumns = Math.min(getResourceColumns(), mMaxColumns);
-        if (oldColumns != mColumns) {
-            requestLayout();
-            return true;
-        }
-        return false;
+        if (isRoundQS())
+            mColumns = mMaxColumns;
+        else
+            mColumns = Math.min(mResourceColumns, mMaxColumns);
+        return oldColumns != mColumns;
     }
 
     @Override

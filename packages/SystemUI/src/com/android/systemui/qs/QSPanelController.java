@@ -132,22 +132,19 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_STYLE);
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_DURATION);
         mTunerService.addTunable(mView, QSPanel.QS_TILE_ANIMATION_INTERPOLATOR);
-        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS);
-        mTunerService.addTunable(mView, QSPanel.QS_LAYOUT_COLUMNS_LANDSCAPE);
-        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS);
-        mTunerService.addTunable(mView, QSPanel.QQS_LAYOUT_ROWS_LANDSCAPE);
 
         mView.setBrightnessRunnable(() -> {
             mView.updateResources();
             updateBrightnessMirror();
         });
 
-        mView.updateResources();
+       mView.updateResources();
         mView.setSceneContainerEnabled(mSceneContainerEnabled);
         if (mView.isListening()) {
             refreshAllTiles();
         }
         switchTileLayout(true);
+        mView.updateColumns();
         mBrightnessMirrorHandler.onQsPanelAttached();
         PagedTileLayout pagedTileLayout= ((PagedTileLayout) mView.getOrCreateTileLayout());
         pagedTileLayout.setOnTouchListener(mTileLayoutTouchListener);
@@ -176,6 +173,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     @Override
     protected void onConfigurationChanged() {
         mView.updateResources();
+        mView.updateColumns();
         int newDensity = mView.getResources().getConfiguration().densityDpi;
         if (newDensity != mLastDensity) {
             mLastDensity = newDensity;
