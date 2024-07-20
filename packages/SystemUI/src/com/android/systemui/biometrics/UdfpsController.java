@@ -752,7 +752,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel,
             @NonNull UdfpsOverlayInteractor udfpsOverlayInteractor,
             @NonNull PowerInteractor powerInteractor,
-            @Application CoroutineScope scope) {
+            @Application CoroutineScope scope,
             @NonNull AuthController authController) {
         mContext = context;
         mExecution = execution;
