@@ -424,6 +424,10 @@ public class KeyguardIndicationController {
     public void setIndicationArea(ViewGroup indicationArea) {
         mIndicationArea = indicationArea;
         mFaceIconView = indicationArea.findViewById(R.id.face_unlock_icon);
+        if (isUdfpsSupported()) {
+            // Hide face unlock animation icon on udfps supported devices
+            mFaceIconView.setVisibility(View.GONE);
+        }
         mTopIndicationView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mLockScreenIndicationView = indicationArea.findViewById(
             R.id.keyguard_indication_text_bottom);
@@ -989,6 +993,14 @@ public class KeyguardIndicationController {
             return;
         }
 
+        if (!isUdfpsSupported()) { // Show face unlock icon on non-udfps devices only
+            if (TextUtils.equals(biometricMessage, mContext.getString(R.string.keyguard_face_successful_unlock))) {
+                mFaceIconView.setState(FaceUnlockImageView.State.SUCCESS);
+            } else if (TextUtils.equals(biometricMessage, mContext.getString(R.string.keyguard_face_failed))) {
+                mFaceIconView.setState(FaceUnlockImageView.State.NOT_VERIFIED);
+            }
+        }
+
         if (!isSuccessMessage
                 && mBiometricMessageSource == FINGERPRINT
                 && biometricSourceType != FINGERPRINT) {
@@ -1033,14 +1045,16 @@ public class KeyguardIndicationController {
     }
 
     private void showFaceUnlockRecognizingMessage() {
-        mFaceIconView.setVisibility(View.VISIBLE);
-        mFaceIconView.setState(FaceUnlockImageView.State.SCANNING);
+        if (!isUdfpsSupported()) {
+            mFaceIconView.setVisibility(View.VISIBLE);
+            mFaceIconView.setState(FaceUnlockImageView.State.SCANNING);
+        }
         showBiometricMessage(mContext.getResources().getString(
                                     R.string.face_unlock_recognizing), FACE);
     }
 
     private void hideFaceUnlockRecognizingMessage() {
-        if (mFaceIconView != null) {
+        if (!isUdfpsSupported() && mFaceIconView != null) {
             mFaceIconView.setVisibility(View.GONE);
         }
         String faceUnlockMessage = mContext.getResources().getString(
@@ -1768,6 +1782,10 @@ public class KeyguardIndicationController {
     private boolean canUnlockWithFingerprint() {
         return mKeyguardUpdateMonitor.isUnlockWithFingerprintPossible(
                 getCurrentUser()) && mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed();
+    }
+
+    private boolean isUdfpsSupported() {
+        return mKeyguardUpdateMonitor.isUdfpsSupported();
     }
 
     private void showErrorMessageNowOrLater(String errString, @Nullable String followUpMsg,
