@@ -47,7 +47,4 @@ interface IAlarmManager {
     boolean hasScheduleExactAlarm(String packageName, int userId);
     @EnforcePermission("DUMP")
     int getConfigVersion();
-
-    // blocked alarms support
-    String getSeenAlarms();
 }
