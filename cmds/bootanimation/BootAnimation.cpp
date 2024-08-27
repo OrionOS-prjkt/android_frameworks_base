@@ -79,6 +79,7 @@ static const char SYSTEM_SHUTDOWNANIMATION_FILE[] = "/system/media/shutdownanima
 
 static const char* const BOOT_ANIMATION_FILES[] = {
     "/product/media/bootanimation.zip",
+    "/product/media/bootanimation_ctos.zip",
     "/product/media/bootanimation_cyberpunk.zip",
     "/product/media/bootanimation_google.zip",
     "/product/media/bootanimation_google_monet.zip",
@@ -776,9 +777,9 @@ void BootAnimation::findBootAnimationFile() {
     char value[PROPERTY_VALUE_MAX];
     property_get("persist.sys.bootanimation_style", value, "0");
     const int bootAnimStyle = atoi(value);
-    const char* selectedBootAnimation = 
-        (bootAnimStyle >= 0 && bootAnimStyle < 6) 
-        ? BOOT_ANIMATION_FILES[bootAnimStyle] 
+    const char* selectedBootAnimation =
+        (bootAnimStyle >= 0 && bootAnimStyle < sizeof(BOOT_ANIMATION_FILES) / sizeof(BOOT_ANIMATION_FILES[0]))
+        ? BOOT_ANIMATION_FILES[bootAnimStyle]
         : BOOT_ANIMATION_FILES[0];
     static const std::vector<std::string> bootFiles = {
         std::string(selectedBootAnimation)
