@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.lang.reflect.Field;
@@ -44,10 +45,12 @@ public class PixelPropsUtils {
 
     private static final String SPOOF_PIXEL_GMS = "persist.sys.pixelprops.gms";
     private static final String SPOOF_PIXEL_GPHOTOS = "persist.sys.pixelprops.gphotos";
-    private static final String SPOOF_PIXEL_NETFLIX = "persist.sys.pixelprops.netflix";
     private static final String ENABLE_PROP_OPTIONS = "persist.sys.pixelprops.all";
     private static final String ENABLE_GAME_PROP_OPTIONS = "persist.sys.gameprops.enabled";
     private static final String SPOOF_PIXEL_GOOGLE_APPS = "persist.sys.pixelprops.google";
+
+    private static final String PACKAGE_NETFLIX = "com.netflix.mediaclient";
+    private static final String sNetflixModel = SystemProperties.get("persist.sys.pihooks.netflix_model", "");
 
     private static final Map<String, Object> propsToChangeMainline;
     private static final Map<String, Object> propsToChangePixelXL;
@@ -59,10 +62,10 @@ public class PixelPropsUtils {
     private static final Map<String, String> DEFAULT_VALUES = Map.of(
         "BRAND", "google",
         "MANUFACTURER", "Google",
-        "DEVICE", "akita",
-        "FINGERPRINT", "google/akita_beta/akita:15/AP31.240617.015/12207491:user/release-keys",
-        "MODEL", "Pixel 8a",
-        "PRODUCT", "akita_beta",
+        "DEVICE", "husky",
+        "FINGERPRINT", "google/husky_beta/husky:15/AP31.240617.015/12207491:user/release-keys",
+        "MODEL", "Pixel 8 Pro",
+        "PRODUCT", "husky_beta",
         "DEVICE_INITIAL_SDK_INT", "21",
         "SECURITY_PATCH", "2024-08-05",
         "ID", "AP31.240617.015"
@@ -111,23 +114,33 @@ public class PixelPropsUtils {
         final String processName = Application.getProcessName();
         boolean isExcludedProcess = processName != null && (processName.toLowerCase().contains("unstable"));
 
-        String[] packagesToChangePixel8Pro = {
+        String[] packagesToChangePixel9Pro = {
+            "com.android.chrome",
+            "com.breel.wallpapers20",
+            "com.google.android.aicore",
             "com.google.android.apps.aiwallpapers",
             "com.google.android.apps.bard",
             "com.google.android.apps.customization.pixel",
             "com.google.android.apps.emojiwallpaper",
             "com.google.android.apps.nexuslauncher",
+            "com.google.android.apps.pixel.agent",
+            "com.google.android.apps.pixel.creativeassistant",
+            "com.google.android.apps.pixel.support",
             "com.google.android.apps.privacy.wildlife",
+            "com.google.android.apps.subscriptions.red",
             "com.google.android.apps.wallpaper",
             "com.google.android.apps.wallpaper.pixel",
+            "com.google.android.apps.weather",
             "com.google.android.gms",
             "com.google.android.googlequicksearchbox",
             "com.google.android.inputmethod.latin",
             "com.google.android.tts",
-            "com.google.android.wallpaper.effects"
+            "com.google.android.wallpaper.effects",
+            "com.google.pixel.livewallpaper",
+            "com.nhs.online.nhsonline"
         };
 
-        if (Arrays.asList(packagesToChangePixel8Pro).contains(packageName) && !isExcludedProcess) {
+        if (Arrays.asList(packagesToChangePixel9Pro).contains(packageName) && !isExcludedProcess) {
             if (SystemProperties.getBoolean(SPOOF_PIXEL_GOOGLE_APPS, true)) {
                 if (!isPixelDevice) {
                     propsToChange.putAll(propsToChangeMainline);
@@ -140,7 +153,9 @@ public class PixelPropsUtils {
                 propsToChange.putAll(propsToChangePixelXL);
             } else {
                 if (!isPixelDevice) {
-                    propsToChange.putAll(propsToChangePixel5a);
+                    if (processName.toLowerCase().contains("gservice")){
+                        propsToChange.putAll(propsToChangePixel5a);
+                    }
                 }
             }
         }
@@ -150,6 +165,13 @@ public class PixelPropsUtils {
                 if (shouldTryToCertifyDevice(Application.getProcessName())) {
                     return;
                 }
+            }
+        }
+
+        if (PACKAGE_NETFLIX.equals(packageName)) {
+            if (!TextUtils.isEmpty(sNetflixModel)) {
+                dlog("Setting model to " + sNetflixModel + " for Netflix");
+                propsToChange.put("MODEL", sNetflixModel);
             }
         }
 
