@@ -441,7 +441,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
         mTunerService.removeTunable(this);
-        mClockController.removeTunable();
         mOngoingCallController.removeCallback(mOngoingCallListener);
         mAnimationScheduler.removeCallback(this);
     }
