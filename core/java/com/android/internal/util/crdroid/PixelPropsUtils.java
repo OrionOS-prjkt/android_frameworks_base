@@ -1,24 +1,25 @@
 /*
- * Copyright (C) 2020 The Pixel Experience Project
- *               2021-2024 crDroid Android Project
- *               2024 RisingOS Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+* Copyright (C) 2020 The Pixel Experience Project
+*               2021-2024 crDroid Android Project
+*               2024 RisingOS Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 package com.android.internal.util.crdroid;
 
 import android.app.ActivityTaskManager;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -26,8 +27,11 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Process;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -38,41 +42,40 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PixelPropsUtils {
-
+    
     private static final String TAG = PixelPropsUtils.class.getSimpleName();
     private static final String PROP_HOOKS = "persist.sys.pihooks_";
     private static final String PROP_HOOKS_MAINLINE = "persist.sys.pihooks_mainline_";
     private static final boolean DEBUG = SystemProperties.getBoolean(PROP_HOOKS + "DEBUG", false);
-
+    
     private static final String SPOOF_PIXEL_GMS = "persist.sys.pixelprops.gms";
     private static final String SPOOF_PIXEL_GPHOTOS = "persist.sys.pixelprops.gphotos";
     private static final String ENABLE_PROP_OPTIONS = "persist.sys.pixelprops.all";
     private static final String ENABLE_GAME_PROP_OPTIONS = "persist.sys.gameprops.enabled";
     private static final String SPOOF_PIXEL_GOOGLE_APPS = "persist.sys.pixelprops.google";
-
+    
     private static final Map<String, Object> propsToChangeMainline;
     private static final Map<String, Object> propsToChangePixelXL;
     private static final Map<String, Object> propsToChangePixel5a;
-
+    
     private static final ComponentName GMS_ADD_ACCOUNT_ACTIVITY = ComponentName.unflattenFromString(
-            "com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity");
-            
+    "com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity");
+    
     private static final Map<String, String> DEFAULT_VALUES = Map.ofEntries(
-		Map.entry("BRAND", "google"),
-		Map.entry("MANUFACTURER", "Google"),
-		Map.entry("DEVICE", "tokay"),
-		Map.entry("FINGERPRINT", "google/tokay_beta/tokay:15/AP41.240823.009/12329489:user/release-keys"),
-		Map.entry("MODEL", "Pixel 9"),
-		Map.entry("PRODUCT", "tokay_beta"),
-		Map.entry("DEVICE_INITIAL_SDK_INT", "25"),
-		Map.entry("SECURITY_PATCH", "2024-09-05"),
-		Map.entry("ID", "AP41.240823.009"),
-		Map.entry("TYPE", "user"),
-		Map.entry("TAGS", "release-keys"),
-		Map.entry("INCREMENTAL", "12329489"),
-		Map.entry("RELEASE", "15")
+    Map.entry("BRAND", "google"),
+    Map.entry("MANUFACTURER", "Google"),
+    Map.entry("DEVICE", "tokay"),
+    Map.entry("FINGERPRINT", "google/tokay_beta/tokay:15/AP41.240823.009/12329489:user/release-keys"),
+    Map.entry("PRODUCT", "tokay_beta"),
+    Map.entry("DEVICE_INITIAL_SDK_INT", "25"),
+    Map.entry("SECURITY_PATCH", "2024-09-05"),
+    Map.entry("ID", "AP41.240823.009"),
+    Map.entry("TYPE", "user"),
+    Map.entry("TAGS", "release-keys"),
+    Map.entry("INCREMENTAL", "12329489"),
+    Map.entry("RELEASE", "15")
     );
-
+    
     static {
         propsToChangeMainline = new HashMap<>();
         propsToChangeMainline.put("BRAND", SystemProperties.get(PROP_HOOKS_MAINLINE + "BRAND"));
@@ -98,26 +101,26 @@ public class PixelPropsUtils {
         propsToChangePixel5a.put("ID", "AP2A.240805.005");
         propsToChangePixel5a.put("FINGERPRINT", "google/barbet/barbet:14/AP2A.240805.005/12025142:user/release-keys");
     }
-
+    
     public static void setProps(String packageName) {
         setGameProps(packageName);
         if (!SystemProperties.getBoolean(ENABLE_PROP_OPTIONS, true)) {
             return;
         }
-
+        
         if (packageName == null || packageName.isEmpty()) {
             return;
         }
-
+        
         boolean isPixelDevice = SystemProperties.get("ro.soc.manufacturer").equalsIgnoreCase("Google");
         String model = SystemProperties.get("ro.product.model");
         boolean isMainlineDevice = isPixelDevice && model.matches("Pixel [8-9][a-zA-Z ]*");
-
+        
         Map<String, Object> propsToChange = new HashMap<>();
-
+        
         final String processName = Application.getProcessName();
         boolean isExcludedProcess = processName != null && (processName.toLowerCase().contains("unstable"));
-
+        
         String[] packagesToSpoofAsMainlineDevice = {
             "com.google.android.apps.aiwallpapers",
             "com.google.android.apps.bard",
@@ -133,7 +136,7 @@ public class PixelPropsUtils {
             "com.google.android.tts",
             "com.google.android.wallpaper.effects"
         };
-
+        
         if (Arrays.asList(packagesToSpoofAsMainlineDevice).contains(packageName) && !isExcludedProcess) {
             if (SystemProperties.getBoolean(SPOOF_PIXEL_GOOGLE_APPS, true)) {
                 if (!isMainlineDevice) {
@@ -141,7 +144,7 @@ public class PixelPropsUtils {
                 }
             }
         }
-
+        
         if (packageName.equals("com.google.android.apps.photos")) {
             if (SystemProperties.getBoolean(SPOOF_PIXEL_GPHOTOS, true)) {
                 propsToChange.putAll(propsToChangePixelXL);
@@ -158,9 +161,9 @@ public class PixelPropsUtils {
         
         if (packageName.equals("com.google.android.settings.intelligence")) {
             setPropValue("FINGERPRINT", "eng.nobody." + 
-                new java.text.SimpleDateFormat("yyyyMMdd.HHmmss").format(new java.util.Date()));
+            new java.text.SimpleDateFormat("yyyyMMdd.HHmmss").format(new java.util.Date()));
         }
-
+        
         if (packageName.equals("com.google.android.gms")) {
             if (SystemProperties.getBoolean(SPOOF_PIXEL_GMS, true)) {
                 if (shouldTryToCertifyDevice(Application.getProcessName())) {
@@ -168,7 +171,7 @@ public class PixelPropsUtils {
                 }
             }
         }
-
+        
         if (!propsToChange.isEmpty()) {
             if (DEBUG) Log.d(TAG, "Defining props for: " + packageName);
             for (Map.Entry<String, Object> prop : propsToChange.entrySet()) {
@@ -207,7 +210,7 @@ public class PixelPropsUtils {
             }
         }
     }
-
+    
     private static void setPropValue(String key, Object value) {
         try {
             Field field = getBuildClassField(key);
@@ -237,17 +240,17 @@ public class PixelPropsUtils {
             Log.e(TAG, "Failed to set prop " + key, e);
         }
     }
-
+    
     public static String getBuildID(String fingerprint) {
         Pattern pattern = Pattern.compile("([A-Za-z0-9]+\\.\\d+\\.\\d+\\.\\w+)");
         Matcher matcher = pattern.matcher(fingerprint);
-
+        
         if (matcher.find()) {
             return matcher.group(1);
         }
         return "";
     }
-
+    
     private static void setVersionFieldString(String key, String value) {
         try {
             Field field = Build.VERSION.class.getDeclaredField(key);
@@ -258,7 +261,7 @@ public class PixelPropsUtils {
             Log.e(TAG, "Failed to spoof Build." + key, e);
         }
     }
-
+    
     private static void setVersionFieldInt(String key, int value) {
         try {
             dlog("Defining version field " + key + " to " + value);
@@ -270,7 +273,7 @@ public class PixelPropsUtils {
             Log.e(TAG, "Failed to spoof Build." + key, e);
         }
     }
-
+    
     private static Field getBuildClassField(String key) throws NoSuchFieldException {
         try {
             Field field = Build.class.getDeclaredField(key);
@@ -282,26 +285,26 @@ public class PixelPropsUtils {
             return field;
         }
     }
-
+    
     private static boolean isGmsAddAccountActivityOnTop() {
         try {
             final ActivityTaskManager.RootTaskInfo focusedTask =
-                    ActivityTaskManager.getService().getFocusedRootTaskInfo();
+            ActivityTaskManager.getService().getFocusedRootTaskInfo();
             return focusedTask != null && focusedTask.topActivity != null
-                    && focusedTask.topActivity.equals(GMS_ADD_ACCOUNT_ACTIVITY);
+            && focusedTask.topActivity.equals(GMS_ADD_ACCOUNT_ACTIVITY);
         } catch (Exception e) {
             Log.e(TAG, "Unable to get top activity!", e);
         }
         return false;
     }
-
+    
     private static boolean shouldTryToCertifyDevice(String processName) {
         if (processName == null || !processName.toLowerCase().contains("unstable")) {
             return false;
         }
-
+        
         setPropValue("TIME", System.currentTimeMillis());
-
+        
         final boolean was = isGmsAddAccountActivityOnTop();
         final TaskStackListener taskStackListener = new TaskStackListener() {
             @Override
@@ -309,7 +312,7 @@ public class PixelPropsUtils {
                 final boolean is = isGmsAddAccountActivityOnTop();
                 if (is ^ was) {
                     dlog("GmsAddAccountActivityOnTop is:" + is + " was:" + was +
-                            ", killing myself!"); // process will restart automatically later
+                    ", killing myself!"); // process will restart automatically later
                     Process.killProcess(Process.myPid());
                 }
             }
@@ -328,7 +331,7 @@ public class PixelPropsUtils {
             return false;
         }
     }
-
+    
     public static boolean shouldBypassTaskPermission(Context context) {
         // GMS doesn't have MANAGE_ACTIVITY_TASKS permission
         final int callingUid = Binder.getCallingUid();
@@ -342,7 +345,28 @@ public class PixelPropsUtils {
         }
         return gmsUid == callingUid;
     }
-
+    
+    private static Context getApplicationContext() {
+        try {
+            return ActivityThread.currentApplication().getApplicationContext();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting application context", e);
+            return null;
+        }
+    }
+    
+    private static boolean isCallerSafetyNet() {
+        return Arrays.stream(Thread.currentThread().getStackTrace())
+        .anyMatch(elem -> elem.getClassName().toLowerCase()
+        .contains("droidguard"));
+    }
+    
+    private static boolean shouldBlockKeyAttestation() { 
+        return (
+        SystemProperties.getBoolean("persist.sys.pihooks.block_gms_key_attestation", true) 
+        && isCallerSafetyNet()); 
+    }
+    
     private static void spoofBuildGms() {
         for (Map.Entry<String, String> entry : DEFAULT_VALUES.entrySet()) {
             String propKey = PROP_HOOKS + entry.getKey();
@@ -358,21 +382,14 @@ public class PixelPropsUtils {
             }
         }
     }
-
-    private static boolean isCallerSafetyNet() {
-        return Arrays.stream(Thread.currentThread().getStackTrace())
-                        .anyMatch(elem -> elem.getClassName().toLowerCase()
-                            .contains("droidguard"));
-    }
-
+    
     public static void onEngineGetCertificateChain() {
-        // Check stack for SafetyNet or Play Integrity
-        if (isCallerSafetyNet()) {
+        if (shouldBlockKeyAttestation()) {
             Log.i(TAG, "Blocked key attestation");
             throw new UnsupportedOperationException();
         }
     }
-
+    
     private static void dlog(String msg) {
         if (DEBUG) Log.d(TAG, msg);
     }

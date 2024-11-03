@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-package android.security;
+ package android.security;
 
-import android.annotation.NonNull;
-import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
-import android.os.Binder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
-import android.os.StrictMode;
-import android.security.keymaster.KeymasterDefs;
-import android.system.keystore2.Domain;
-import android.system.keystore2.IKeystoreService;
-import android.system.keystore2.KeyDescriptor;
-import android.system.keystore2.KeyEntryResponse;
-import android.system.keystore2.ResponseCode;
-import android.util.Log;
-
-import java.util.Calendar;
+ import android.annotation.NonNull;
+ import android.compat.annotation.ChangeId;
+ import android.compat.annotation.Disabled;
+ import android.os.Binder;
+ import android.os.RemoteException;
+ import android.os.ServiceManager;
+ import android.os.ServiceSpecificException;
+ import android.os.StrictMode;
+ import android.os.SystemProperties;
+ import android.security.keymaster.KeymasterDefs;
+ import android.system.keystore2.Domain;
+ import android.system.keystore2.IKeystoreService;
+ import android.system.keystore2.KeyDescriptor;
+ import android.system.keystore2.KeyEntryResponse;
+ import android.system.keystore2.ResponseCode;
+ import android.util.Log;
+ 
+ import java.util.Calendar;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -280,11 +281,12 @@ public class KeyStore2 {
      * @hide
      */
     public KeyEntryResponse getKeyEntry(@NonNull KeyDescriptor descriptor)
-            throws KeyStoreException {
+    throws KeyStoreException {
         StrictMode.noteDiskRead();
 
-        return handleRemoteExceptionWithRetry((service) -> service.getKeyEntry(descriptor));
-    }
+        KeyEntryResponse response = handleRemoteExceptionWithRetry(service -> service.getKeyEntry(descriptor));
+        return response;
+}
 
     /**
      * Get the security level specific keystore interface from the keystore daemon.
