@@ -64,15 +64,15 @@ public class PixelPropsUtils {
     private static final Map<String, String> DEFAULT_VALUES = Map.ofEntries(
     Map.entry("BRAND", "google"),
     Map.entry("MANUFACTURER", "Google"),
-    Map.entry("DEVICE", "tokay"),
-    Map.entry("FINGERPRINT", "google/tokay_beta/tokay:15/AP41.240823.009/12329489:user/release-keys"),
-    Map.entry("PRODUCT", "tokay_beta"),
-    Map.entry("DEVICE_INITIAL_SDK_INT", "25"),
-    Map.entry("SECURITY_PATCH", "2024-09-05"),
-    Map.entry("ID", "AP41.240823.009"),
+    Map.entry("DEVICE", "komodo"),
+    Map.entry("FINGERPRINT", "google/komodo_beta/komodo:15/AP41.240925.009/12534705:user/release-keys"),
+    Map.entry("PRODUCT", "komodo_beta"),
+    Map.entry("DEVICE_INITIAL_SDK_INT", "32"),
+    Map.entry("SECURITY_PATCH", "2024-10-05"),
+    Map.entry("ID", "AP41.240925.009"),
     Map.entry("TYPE", "user"),
     Map.entry("TAGS", "release-keys"),
-    Map.entry("INCREMENTAL", "12329489"),
+    Map.entry("INCREMENTAL", "12534705"),
     Map.entry("RELEASE", "15")
     );
     
