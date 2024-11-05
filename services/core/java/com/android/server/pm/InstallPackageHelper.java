@@ -2682,7 +2682,9 @@ final class InstallPackageHelper {
             if (dataOwnerPkg != null && !dataOwnerPkg.isSdkLibrary()) {
                 final boolean downgradeAllowed = true;
                 if (!PackageManagerServiceUtils.isDowngradePermitted(installFlags,
-                        dataOwnerPkg.isDebuggable()) && !downgradeAllowed) {
+                        dataOwnerPkg.isDebuggable())
+                        && android.provider.Settings.Global.getInt(mContext.getContentResolver(),
+                        android.provider.Settings.Global.PM_DOWNGRADE_ALLOWED, 0) == 0) {
                     try {
                         PackageManagerServiceUtils.checkDowngrade(dataOwnerPkg, pkgLite);
                     } catch (PackageManagerException e) {
