@@ -128,7 +128,13 @@ public class ThemeOverlayApplier implements Dumpable {
             "android.customization.sb_data";
     @VisibleForTesting
     static final String OVERLAY_CATEGORY_BRIGHTNESS_SLIDER =
-            "android.theme.customization.brightness_slider";
+            "android.theme.customization.brightness_slider";        
+    @VisibleForTesting
+    static final String OVERLAY_CATEGORY_UI_STYLE_ANDROID =
+            "android.theme.customization.style.android";
+    @VisibleForTesting
+    static final String OVERLAY_CATEGORY_UI_STYLE_SETTINGS =
+            "android.theme.customization.style.settings";
 
     /*
      * All theme customization categories used by the system, in order that they should be applied,
@@ -148,7 +154,9 @@ public class ThemeOverlayApplier implements Dumpable {
             OVERLAY_CATEGORY_DATA,
             OVERLAY_CATEGORY_NAVBAR,
             OVERLAY_CATEGORY_LOCK_CLOCK_FONT,
-            OVERLAY_CATEGORY_BRIGHTNESS_SLIDER);
+            OVERLAY_CATEGORY_BRIGHTNESS_SLIDER,
+            OVERLAY_CATEGORY_UI_STYLE_ANDROID,
+            OVERLAY_CATEGORY_UI_STYLE_SETTINGS);
 
     /* Categories that need to be applied to the current user as well as the system user. */
     @VisibleForTesting
@@ -158,6 +166,7 @@ public class ThemeOverlayApplier implements Dumpable {
             OVERLAY_CATEGORY_DYNAMIC_COLOR,
             OVERLAY_CATEGORY_FONT,
             OVERLAY_CATEGORY_SHAPE,
+            OVERLAY_CATEGORY_UI_STYLE_ANDROID,
             OVERLAY_CATEGORY_ICON_ANDROID,
             OVERLAY_CATEGORY_ICON_SYSUI,
             OVERLAY_CATEGORY_DATA,
@@ -191,15 +200,17 @@ public class ThemeOverlayApplier implements Dumpable {
                 OVERLAY_CATEGORY_SYSTEM_PALETTE, OVERLAY_CATEGORY_ACCENT_COLOR,
                 OVERLAY_CATEGORY_DYNAMIC_COLOR,
                 OVERLAY_CATEGORY_FONT, OVERLAY_CATEGORY_SHAPE,
-                OVERLAY_CATEGORY_ICON_ANDROID));
+                OVERLAY_CATEGORY_ICON_ANDROID, OVERLAY_CATEGORY_UI_STYLE_ANDROID));
         mTargetPackageToCategories.put(SYSUI_PACKAGE,
                 Sets.newHashSet(OVERLAY_CATEGORY_ICON_SYSUI));
         mTargetPackageToCategories.put(SETTINGS_PACKAGE,
-                Sets.newHashSet(OVERLAY_CATEGORY_ICON_SETTINGS));
+                Sets.newHashSet(OVERLAY_CATEGORY_ICON_SETTINGS, OVERLAY_CATEGORY_UI_STYLE_SETTINGS));
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ACCENT_COLOR, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_DYNAMIC_COLOR, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_FONT, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_SHAPE, ANDROID_PACKAGE);
+        mCategoryToTargetPackage.put(OVERLAY_CATEGORY_UI_STYLE_ANDROID, ANDROID_PACKAGE);
+        mCategoryToTargetPackage.put(OVERLAY_CATEGORY_UI_STYLE_SETTINGS, SETTINGS_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_ANDROID, ANDROID_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_SYSUI, SYSUI_PACKAGE);
         mCategoryToTargetPackage.put(OVERLAY_CATEGORY_ICON_SETTINGS, SETTINGS_PACKAGE);
